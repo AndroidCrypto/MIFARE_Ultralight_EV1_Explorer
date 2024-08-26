@@ -114,6 +114,20 @@ public class MIFARE_Ultralight_C {
         }
     }
 
+    // runs a complete authentication session with the default 3DES key
+    public static boolean doAuthenticateUltralightCDefault(NfcA nfcA) {
+        Log.d(TAG, printData("mifareULCDefaultKey", defaultAuthKey));
+        Log.d(TAG, "mifareULCDefaultKey:" + new String(defaultAuthKey, StandardCharsets.UTF_8) + "###");
+        boolean authSuccess = false;
+        try {
+            authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
+            return authSuccess;
+        } catch (Exception e) {
+            Log.e(TAG, "doAuthenticateUltralightCDefault Exception: " + e.getMessage());
+        }
+        return false;
+    }
+
     /**
      * This allows to read the complete memory = all pages of the tag. If a page is not readable the
      * method returns NULL.

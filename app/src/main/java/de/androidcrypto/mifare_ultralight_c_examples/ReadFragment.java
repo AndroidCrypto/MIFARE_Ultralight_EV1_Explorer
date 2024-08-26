@@ -43,7 +43,6 @@ import androidx.fragment.app.Fragment;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -87,7 +86,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
 
     private TextView readResult;
     private TextView readSpan;
-    private TextView readSpanLedend;
+    private TextView readSpanLegend;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
     private RadioButton rbNoCounterIncrease, rbCounterIncrease;
     private View loadingLayout;
@@ -123,7 +122,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         readResult = getView().findViewById(R.id.tvReadResult);
         readSpan = getView().findViewById(R.id.tvSpan);
-        readSpanLedend = getView().findViewById(R.id.tvSpanLegend);
+        readSpanLegend = getView().findViewById(R.id.tvSpanLegend);
         rbNoAuth = getView().findViewById(R.id.rbNoAuth);
         rbDefaultAuth = getView().findViewById(R.id.rbDefaultAuth);
         rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
@@ -384,7 +383,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                     @Override
                     public void run() {
                         readSpan.setText(spanString);
-                        readSpanLedend.setText(spanLegendString);
+                        readSpanLegend.setText(spanLegendString);
                     }
                 });
 

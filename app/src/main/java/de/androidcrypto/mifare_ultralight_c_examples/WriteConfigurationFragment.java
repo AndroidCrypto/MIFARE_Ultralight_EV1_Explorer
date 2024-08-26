@@ -3,18 +3,15 @@ package de.androidcrypto.mifare_ultralight_c_examples;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.doAuthenticateUltralightCDefault;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.getCounterValue;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.increaseCounterValueByOne;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.hexStringToByteArray;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.printData;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.MifareUltralight;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -26,43 +23,29 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link WriteCounterFragment#newInstance} factory method to
+ * Use the {@link WriteConfigurationFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderCallback {
+public class WriteConfigurationFragment extends Fragment implements NfcAdapter.ReaderCallback {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String TAG = "WriteCounterFragment";
+    private static final String TAG = "ReadCounterFragment";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
-    private com.google.android.material.textfield.TextInputLayout counter0Layout;
-    private com.google.android.material.textfield.TextInputEditText incrementCounter, counter0, resultNfcWriting;
-    private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
-    private RadioButton incrementNoCounter, incrementCounter0;
-    private View loadingLayout;
-    private NfcAdapter mNfcAdapter;
-    private NfcA nfcA;
-    private String outputString = ""; // used for the UI output
-    private boolean isTagUltralight = false;
-    private int pagesToRead;
-
-    public WriteCounterFragment() {
+    public WriteConfigurationFragment() {
         // Required empty public constructor
     }
 
@@ -72,17 +55,37 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment SendFragment.
+     * @return A new instance of fragment ReceiveFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static WriteCounterFragment newInstance(String param1, String param2) {
-        WriteCounterFragment fragment = new WriteCounterFragment();
+    public static WriteConfigurationFragment newInstance(String param1, String param2) {
+        WriteConfigurationFragment fragment = new WriteConfigurationFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
+    private TextView readResult;
+    private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
+    private RadioButton rbNoCounterIncrease, rbCounterIncrease;
+    private View loadingLayout;
+    private String outputString = ""; // used for the UI output
+    private NfcAdapter mNfcAdapter;
+    private NfcA nfcA;
+    private boolean isTagUltralight = false;
+    private boolean[] isPageReadable;
+    String dumpExportString = "";
+    String tagIdString = "";
+    String tagTypeString = "";
+    private static final int REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 100;
+    Context contextSave;
+    private byte[][] pagesComplete;
+    private int pagesToRead;
+    byte[] versionData;
+    private boolean isUltralightC = false;
+    private boolean isUltralightEv1 = false;
+    private int counter0 = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,36 +94,33 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        contextSave = getActivity().getApplicationContext();
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this.getContext());
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        readResult = getView().findViewById(R.id.tvReadResult);
+        rbNoAuth = getView().findViewById(R.id.rbNoAuth);
+        rbDefaultAuth = getView().findViewById(R.id.rbDefaultAuth);
+        rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
+        rbNoCounterIncrease = getView().findViewById(R.id.rbNoCounterIncrease);
+        rbCounterIncrease = getView().findViewById(R.id.rbCounterIncrease);
+        loadingLayout = getView().findViewById(R.id.loading_layout);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_write_counter, container, false);
+        return inflater.inflate(R.layout.fragment_write_configuration, container, false);
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        counter0 = getView().findViewById(R.id.etCounter0);
-        rbNoAuth = getView().findViewById(R.id.rbNoAuth);
-        rbDefaultAuth = getView().findViewById(R.id.rbDefaultAuth);
-        rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
-        incrementNoCounter = getView().findViewById(R.id.rbCounterNoIncrease);
-        incrementCounter0 = getView().findViewById(R.id.rbIncreaseCounter0);
-        resultNfcWriting = getView().findViewById(R.id.etReadResult);
-        loadingLayout = getView().findViewById(R.id.loading_layout);
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(getView().getContext());
-    }
-
-    /**
-     * section for NFC
-     */
-
+    // This method is running in another thread when a card is discovered
+    // !!!! This method cannot cannot direct interact with the UI Thread
+    // Use `runOnUiThread` method to change the UI from this method
     @Override
     public void onTagDiscovered(Tag tag) {
-
         // Read and or write to Tag here to the appropriate Tag Technology type class
         // in this example the card should be an NcfA Technology Type
 
@@ -133,8 +133,8 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
         outputString = "";
 
         requireActivity().runOnUiThread(() -> {
-            resultNfcWriting.setText("");
-            resultNfcWriting.setBackgroundColor(getResources().getColor(R.color.white));
+            readResult.setText("");
+            readResult.setBackgroundColor(getResources().getColor(R.color.white));
         });
 
         // you should have checked that this device is capable of working with Mifare Ultralight tags, otherwise you receive an exception
@@ -142,7 +142,7 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
 
         if (nfcA == null) {
             writeToUiAppend("The tag is not readable with NfcA classes, sorry");
-            writeToUiFinal(resultNfcWriting);
+            writeToUiFinal(readResult);
             setLoadingLayoutVisibility(false);
             return;
         }
@@ -198,32 +198,12 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
                     writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
                 }
             }
-
-
-            // this is for Mifare Ultralight-C only
-            // the counter is located in page 41d bytes 0 + 1 (16 bit counter)
-            if (incrementNoCounter.isChecked()) {
-                Log.d(TAG, "No counter should get increased");
-                writeToUiAppend("No counter should get increased");
-            }
-            if (incrementCounter0.isChecked()) {
-                if (!authSuccess) {
-                    writeToUiAppend("Previous Auth was not successful or not done, skipped");
-                } else {
-                    success = increaseCounterValueByOne(nfcA);
-                    writeToUiAppend("Status of increaseCounterValueByOne command to page 41: " + success);
-                }
-            }
-            int counter0I = getCounterValue(nfcA);
-            writeToUiAppend("Counter in page 41d: " + counter0I);
-            writeCounterToUi(counter0I, 0, 0);
-
         } catch (Exception e) {
             writeToUiAppend("Exception on connection: " + e.getMessage());
             e.printStackTrace();
         }
 
-        writeToUiFinal(resultNfcWriting);
+        writeToUiFinal(readResult);
 
         playDoublePing();
 
@@ -233,11 +213,10 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
 
     }
 
-    public static int byteArrayToInt2Byte(byte[] b) {
-        if (b == null) return 0;
-        if (b.length != 2) return 0;
-        return b[0] & 0xFF |
-                (b[1] & 0xFF) << 8;
+    private String generateListEntry(int sector, int block, String line) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(sector).append(":").append(block).append(":").append(line);
+        return sb.toString();
     }
 
     /**
@@ -254,22 +233,13 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
         mp.start();
     }
 
-    private void writeCounterToUi(final int counter0I, final int counter1I, final int counter2I) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                counter0.setText(String.valueOf(counter0I));
-            }
-        });
-    }
-
     private void writeToUiAppend(String message) {
         //System.out.println(message);
         outputString = outputString + message + "\n";
     }
 
     private void writeToUiFinal(final TextView textView) {
-        if (textView == (TextView) resultNfcWriting) {
+        if (textView == (TextView) readResult) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -296,17 +266,8 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
         });
     }
 
-    private void showMessage(String message) {
-        getActivity().runOnUiThread(() -> {
-            Toast.makeText(getContext(),
-                    message,
-                    Toast.LENGTH_SHORT).show();
-            resultNfcWriting.setText(message);
-        });
-    }
-
     private void showWirelessSettings() {
-        Toast.makeText(getView().getContext(), "You need to enable NFC", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this.getContext(), "You need to enable NFC", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
         startActivity(intent);
     }
@@ -314,6 +275,7 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
     @Override
     public void onResume() {
         super.onResume();
+
         if (mNfcAdapter != null) {
 
             if (!mNfcAdapter.isEnabled())
@@ -326,7 +288,7 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
             // Enable ReaderMode for all types of card and disable platform sounds
             // the option NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK is NOT set
             // to get the data of the tag afer reading
-            mNfcAdapter.enableReaderMode(getActivity(),
+            mNfcAdapter.enableReaderMode(this.getActivity(),
                     this,
                     NfcAdapter.FLAG_READER_NFC_A |
                             NfcAdapter.FLAG_READER_NFC_B |
@@ -342,16 +304,7 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
     public void onPause() {
         super.onPause();
         if (mNfcAdapter != null)
-            mNfcAdapter.disableReaderMode(getActivity());
+            mNfcAdapter.disableReaderMode(this.getActivity());
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 }

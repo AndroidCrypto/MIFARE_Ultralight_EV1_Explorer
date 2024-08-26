@@ -36,26 +36,14 @@ public class MainActivity extends AppCompatActivity {
             selectedFragment = new HomeFragment();
         } else if (itemId == R.id.read) {
             selectedFragment = new ReadFragment();
-        } else if (itemId == R.id.read_ciphertext) {
-            selectedFragment = new ReadCounterFragment();
+        } else if (itemId == R.id.write_configuration) {
+            selectedFragment = new WriteConfigurationFragment();
         } else if (itemId == R.id.write) {
             selectedFragment = new WriteFragment();
-        } else if (itemId == R.id.write_ciphertext) {
+        } else if (itemId == R.id.write_counter) {
             selectedFragment = new WriteCounterFragment();
         }
 
-        /*
-        if (itemId == R.id.home) {
-            selectedFragment = new HomeFragment();
-        } else if (itemId == R.id.send) {
-            selectedFragment = new SendFragment();
-        } else if (itemId == R.id.receive) {
-            selectedFragment = new ReceiveFragment();
-        } else if (itemId == R.id.receive_extended) {
-            selectedFragment = new ReceiveExtendedFragment();
-        }
-
-         */
         // It will help to replace the
         // one fragment to other.
         if (selectedFragment != null) {

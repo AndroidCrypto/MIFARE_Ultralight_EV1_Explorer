@@ -12,9 +12,9 @@
         android:title="Read" />
 
     <item
-        android:id="@+id/read_ciphertext"
-        android:icon="@drawable/nfc_icon_rv2"
-        android:title="Read Value" />
+        android:id="@+id/write_configuration"
+        android:icon="@drawable/nfc_icon_w2"
+        android:title="Write Config" />
 
     <item
         android:id="@+id/write"
@@ -22,7 +22,7 @@
         android:title="Write" />
 
     <item
-        android:id="@+id/write_ciphertext"
-        android:icon="@drawable/nfc_icon_wv2"
-        android:title="Write Value" />
+        android:id="@+id/write_counter"
+        android:icon="@drawable/nfc_icon_w2"
+        android:title="Write Counter" />
 </menu>

@@ -12,7 +12,7 @@
         android:title="Read" />
 
     <item
-        android:id="@+id/read_ciphertext"
+        android:id="@+id/write_configuration"
         android:icon="@drawable/nfc_icon_20581"
         android:title="Read Encr" />
 
@@ -22,7 +22,7 @@
         android:title="Write" />
 
     <item
-        android:id="@+id/write_ciphertext"
+        android:id="@+id/write_counter"
         android:icon="@drawable/ic_outline_enhanced_encryption_24"
         android:title="Write Encr" />
 </menu>
