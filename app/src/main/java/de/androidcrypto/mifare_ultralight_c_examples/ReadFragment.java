@@ -1,6 +1,7 @@
 package de.androidcrypto.mifare_ultralight_c_examples;
 
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.defaultAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.getCounterValue;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.increaseCounterValueByOne;
@@ -106,8 +107,6 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
     private boolean isUltralightC = false;
     private boolean isUltralightEv1 = false;
     private int counter0 = 0;
-    private int counter1 = 0;
-    private int counter2 = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -164,10 +163,6 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
 
         // you should have checked that this device is capable of working with Mifare Ultralight tags, otherwise you receive an exception
         nfcA = NfcA.get(tag);
-
-        // MifareUltralight mfu = MifareUltralight.get(tag);
-
-        byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
 
         if (nfcA == null) {
             writeToUiAppend("The tag is not readable with NfcA classes, sorry");

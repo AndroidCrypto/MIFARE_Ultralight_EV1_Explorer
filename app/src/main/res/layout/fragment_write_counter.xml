@@ -46,6 +46,37 @@
             android:textStyle="bold"
             android:visibility="visible" />
 
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbNoAuth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="No Auth" />
+
+            <RadioButton
+                android:id="@+id/rbDefaultAuth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Default Auth" />
+
+            <RadioButton
+                android:id="@+id/rbCustomAuth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Custom Auth" />
+
+        </RadioGroup>
+
         <LinearLayout
             android:id="@+id/loading_layout"
             android:layout_width="wrap_content"
@@ -84,41 +115,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:text="increase counter 0" />
+                android:text="increase counter by 1" />
 
-            <RadioButton
-                android:id="@+id/rbIncreraseCounter1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="increase counter 1" />
-
-            <RadioButton
-                android:id="@+id/rbIncreaseCounter2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:text="increase counter 2" />
         </RadioGroup>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            android:hint="increase value">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCounterIncreaseValue"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:focusable="false"
-                android:text="1"
-                tools:ignore="KeyboardInaccessibleWidget" />
-        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.divider.MaterialDivider
             android:layout_width="match_parent"
@@ -157,60 +156,6 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/etCounter1Layout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            android:hint="Counter 1"
-            app:boxCornerRadiusBottomEnd="5dp"
-            app:boxCornerRadiusBottomStart="5dp"
-            app:boxCornerRadiusTopEnd="5dp"
-            app:boxCornerRadiusTopStart="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCounter1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:focusable="false"
-                android:text="0"
-                tools:ignore="KeyboardInaccessibleWidget" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/etCounter2Layout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
-            android:hint="Counter 2"
-            app:boxCornerRadiusBottomEnd="5dp"
-            app:boxCornerRadiusBottomStart="5dp"
-            app:boxCornerRadiusTopEnd="5dp"
-            app:boxCornerRadiusTopStart="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCounter2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:focusable="false"
-                android:text="0"
-                tools:ignore="KeyboardInaccessibleWidget" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -227,13 +172,18 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etMainResult"
+                android:id="@+id/etReadResult"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:focusable="false"
+                android:padding="10dp"
                 android:text="no NFC tag detected"
-                tools:ignore="KeyboardInaccessibleWidget" />
+                android:textAlignment="textStart"
+                tools:ignore="KeyboardInaccessibleWidget"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:typeface="monospace"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.divider.MaterialDivider
