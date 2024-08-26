@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ReadCounterFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="@string/header_read_counter"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvInformation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="@string/description_read_counter"
+                android:textAlignment="center"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/loading_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="read data - do not move the card" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnCheckAccessBytes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="check access bytes" />
+
+            <TableRow
+                android:id="@+id/tableRowValueBlocksToIntHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/dark_gray"
+                android:padding="3dp">
+
+                <TextView
+                    android:id="@+id/textViewValueBlocksToIntHeader1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="100dp"
+                    android:text="Location"
+                    android:textColor="@color/light_gray" />
+
+                <TextView
+                    android:id="@+id/textViewValueBlocksToIntHeader2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Value"
+                    android:textColor="@color/light_gray" />
+            </TableRow>
+
+            <TableLayout
+                android:id="@+id/tableLayoutValueBlocksToInt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Fake table Row with the width of the
+                (external, nonscroll) header -->
+
+                <TableRow
+                    android:id="@+id/tableRowValueBlocksToIntHeaderFake"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="3dp">
+
+                    <TextView
+                        android:id="@+id/textViewValueBlocksToIntHeaderFake1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:height="0dp"
+                        android:paddingRight="100dp"
+                        android:text="Location" />
+
+                    <TextView
+                        android:id="@+id/textViewValueBlocksToIntHeaderFake2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:height="0dp"
+                        android:text="Value" />
+
+                </TableRow>
+
+            </TableLayout>
+
+            <TextView
+                android:id="@+id/tvReadResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="@string/nfc_result"
+                android:textAlignment="textStart"
+                android:textSize="14sp"
+                android:textStyle="normal"
+                android:typeface="monospace" />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:dividerInsetEnd="16dp"
+                app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>

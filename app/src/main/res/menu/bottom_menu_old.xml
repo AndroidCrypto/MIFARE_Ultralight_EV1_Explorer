@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/home"
+        android:icon="@drawable/ic_outline_home_24"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/read"
+        android:icon="@drawable/ic_outline_read_more_24"
+        android:title="Read" />
+
+    <item
+        android:id="@+id/read_ciphertext"
+        android:icon="@drawable/nfc_icon_20581"
+        android:title="Read Encr" />
+
+    <item
+        android:id="@+id/write"
+        android:icon="@drawable/ic_outline_save_24"
+        android:title="Write" />
+
+    <item
+        android:id="@+id/write_ciphertext"
+        android:icon="@drawable/ic_outline_enhanced_encryption_24"
+        android:title="Write Encr" />
+</menu>
