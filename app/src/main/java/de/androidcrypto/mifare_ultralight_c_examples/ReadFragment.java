@@ -100,11 +100,9 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
     String tagTypeString = "";
     private static final int REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 100;
     Context contextSave;
-    List<SectorMc1kModel> sectorMc1kModels;
     private byte[][] pagesComplete;
     private int pagesToRead;
     byte[] versionData;
-    private boolean isUltralight = false;
     private boolean isUltralightC = false;
     private boolean isUltralightEv1 = false;
     private int counter0 = 0;

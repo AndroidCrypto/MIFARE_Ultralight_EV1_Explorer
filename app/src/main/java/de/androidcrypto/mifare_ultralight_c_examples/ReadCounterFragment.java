@@ -84,7 +84,6 @@ public class ReadCounterFragment extends Fragment implements NfcAdapter.ReaderCa
     String tagTypeString = "";
     private static final int REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 100;
     Context contextSave;
-    List<SectorMc1kModel> sectorMc1kModels;
     private TableLayout mLayout;
 
     @Override
@@ -335,8 +334,6 @@ public class ReadCounterFragment extends Fragment implements NfcAdapter.ReaderCa
         playSinglePing();
         setLoadingLayoutVisibility(true);
         outputString = "";
-        sectorMc1kModels = new ArrayList<>();
-        List<String> valueBlockList = new ArrayList<>();
 
         requireActivity().runOnUiThread(() -> {
             readResult.setBackgroundColor(getResources().getColor(R.color.white));
@@ -431,7 +428,6 @@ promark keys
                     byte[] unused = new byte[1]; // unused byte, can be used for data
                     byte[] keyB = new byte[6]; // access key B
                     byte[][] readResult = readMifareSector(mfc, secCnt);
-                    SectorMc1kModel sectorMc1kModel = null;
                     if (readResult == null) {
                         writeToUiAppend("ERROR - sector " + secCnt + " could not get read");
                         // write a zero data to SectorMc1kModel
@@ -446,19 +442,7 @@ promark keys
                         accessBits = null;
                         unused = null;
                         keyB = null;
-                        sectorMc1kModel = new SectorMc1kModel(
-                                sectorNumber,
-                                isSector0,
-                                isReadableSector,
-                                sectorData,
-                                uidData,
-                                blockData,
-                                accessBlock,
-                                keyA,
-                                accessBits,
-                                unused,
-                                keyB
-                        );
+
                     } else {
                         // analyze content data and write to SectorMc1kModel
                         sectorNumber = secCnt;
@@ -478,27 +462,8 @@ promark keys
                         accessBits = Arrays.copyOfRange(accessBlock, 6, 9);
                         unused = Arrays.copyOfRange(accessBlock, 9, 10);
                         keyB = readResult[2];
-                        sectorMc1kModel = new SectorMc1kModel(
-                                sectorNumber,
-                                isSector0,
-                                isReadableSector,
-                                sectorData,
-                                uidData,
-                                blockData,
-                                accessBlock,
-                                keyA,
-                                accessBits,
-                                unused,
-                                keyB
-                        );
+
                     }
-                    sectorMc1kModels.add(sectorMc1kModel);
-                    if (sectorMc1kModel != null) {
-                        writeToUiAppend(sectorMc1kModel.dump());
-
-                    } // for (int secCnt = 0; secCnt < sectorCount; secCnt++) {
-                    writeToUiAppend("collected all sectors in sectorMc1kModels: " + sectorMc1kModels.size());
-
 
 
                 } // for (int secCnt = 0; secCnt < sectorCount; secCnt++) {
@@ -511,28 +476,11 @@ promark keys
                 // see DumpEditor - decodeValueBlocks()
                 // see ValueBlocksToInt - onCreate
 
-                int numberOfRecords = sectorMc1kModels.size();
+
                 requireActivity().runOnUiThread(() -> {
                     mLayout.setBackgroundColor(getResources().getColor(R.color.dark_gray));
                 });
 
-                for (int sector = 0; sector < numberOfRecords; sector++) {
-                    SectorMc1kModel s1m = sectorMc1kModels.get(sector);
-                    if (s1m.isReadableSector()) {
-                        // work only for readable sectors
-                        // only blocks 0, 1 and 2 are checked for a ValueBlock
-                        String line0 = bytesToHexNpe(Arrays.copyOfRange(s1m.getSectorData(), 0, 16));
-                        String line1 = bytesToHexNpe(Arrays.copyOfRange(s1m.getSectorData(), 16, 32));
-                        String line2 = bytesToHexNpe(Arrays.copyOfRange(s1m.getSectorData(), 32, 48));
-                        //if (isValueBlock(line0)) valueBlockList.add(generateListEntry(sector, (4 * sector) + 0, line0));
-                        if (isValueBlock(line0))
-                            valueBlockList.add(generateListEntry(sector, 0, line0));
-                        if (isValueBlock(line1))
-                            valueBlockList.add(generateListEntry(sector, 1, line1));
-                        if (isValueBlock(line2))
-                            valueBlockList.add(generateListEntry(sector, 2, line2));
-                    }
-                }
             }
 
             mfc.close();
@@ -542,20 +490,6 @@ promark keys
             e.printStackTrace();
         }
 
-        writeToUiAppend("The tag contains numberOfValueBlocks: " + valueBlockList.size());
-        if (valueBlockList.size() > 0) {
-            for (int i = 0; i < valueBlockList.size(); i++) {
-            //for (int i = 0; i < 3; i++) {
-                System.out.println("*** i : " + i + " ***");
-                // bring the data to a nice view
-                String[] parts = valueBlockList.get(i).split(":");
-                addPosInfoRow("Sector"
-                        + ": " + parts[0] + ", "
-                        + "Block"
-                        + ": " + parts[1]);
-                addValueBlock(parts[2]);
-            }
-        }
 
         writeToUiFinal(readResult);
         playDoublePing();
