@@ -110,17 +110,6 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvReadResult"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:text="@string/nfc_result"
-                android:textAlignment="textStart"
-                android:textSize="14sp"
-                android:textStyle="normal"
-                android:typeface="monospace" />
-
             <com.google.android.material.divider.MaterialDivider
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -149,6 +138,26 @@
                 android:textAlignment="center"
                 android:textSize="18sp"
                 android:textStyle="normal" />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:dividerInsetEnd="16dp"
+                app:dividerInsetStart="16dp"
+                app:dividerThickness="4dp" />
+
+            <TextView
+                android:id="@+id/tvReadResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="@string/nfc_result"
+                android:textAlignment="textStart"
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:typeface="monospace" />
 
         </LinearLayout>
 

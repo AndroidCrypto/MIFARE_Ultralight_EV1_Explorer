@@ -35,7 +35,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -75,22 +74,10 @@ public class HomeFragment extends Fragment {
                 displayLicensesAlertDialog();
             }
         });
-
-        boolean nxpChipAvailable = deviceSupportsMifareClassic(view.getContext());
-        String messageTrue = "Congratulations ! Your device IS supporting Mifare Ultralight and/or Mifare Classic NFC tags.";
-        String messageFalse = "I'm sorry, but your device is NOT supporting Mifare Ultralight and/or Mifare Classic NFC tags.";
+        String messageTrue = "Although a MIFARE Ultralight C is very similar to an Ultralight EV1 tag, you should NOT use this app with an Ultralight C tag only.";
         TextView textViewTrue = getView().findViewById(R.id.textViewTrue);
-        TextView textViewFalse = getView().findViewById(R.id.textViewFalse);
-        if (nxpChipAvailable) {
-            textViewTrue.setVisibility(View.VISIBLE);
-            textViewTrue.setText(messageTrue);
-            textViewFalse.setVisibility(View.GONE);
-        } else {
-            // todo disable read & write buttons
-            textViewTrue.setVisibility(View.GONE);
-            textViewFalse.setText(messageFalse);
-            textViewFalse.setVisibility(View.VISIBLE);
-        }
+        textViewTrue.setVisibility(View.VISIBLE);
+        textViewTrue.setText(messageTrue);
     }
 
     @Override
@@ -116,16 +103,4 @@ public class HomeFragment extends Fragment {
                 .setPositiveButton(android.R.string.ok, null)
                 .show();
     }
-
-    public boolean deviceSupportsMifareClassic(Context context) {
-        FeatureInfo[] info = context.getPackageManager().getSystemAvailableFeatures();
-        for (FeatureInfo i : info) {
-            String name = i.name;
-            if (name != null && name.equals("com.nxp.mifare")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }

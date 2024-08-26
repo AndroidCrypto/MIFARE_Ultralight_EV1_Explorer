@@ -1,16 +1,16 @@
 <resources>
-    <string name="app_name">NFC MIFARE Ultralight NfcA Example</string>
+    <string name="app_name">MIFARE Ultralight C Example</string>
     <string name="home_description">This application reads and writes data from/to a MIFARE Ultralight C NFC tag.</string>
-    <string name="home_fragments">There are 5 icons to click on:\n1 home = this page\n2 read data\n3 read counter = read one or more counters on the tag\n4 write data\n5 write counter = increment one or more counters</string>
-    <string name="header_read">This app works with a MIFARE Ultralight tag for reading</string>
+    <string name="home_fragments">There are 5 icons to click on:\n1 home = this page\n2 read data with or without authentication\n3 read counter = read one or more counters on the tag\n4 write data\n5 write counter = increment one or more counters</string>
+    <string name="header_read">This app works with a MIFARE Ultralight C tag for reading</string>
     <string name="description_read">This example expects a MIFARE Ultralight type tag. The tag should use only the well known keys A and B for authentication.\n\nWhen a tag is discovered the data from all records will be read.</string>
     <string name="header_read_counter">Read the counter</string>
-    <string name="description_read_counter">This example reads an Ultralight C or EV1 tag type and shows the value of the counter(s).\n\nWhen a tag is discovered the data from all records will be read.</string>
+    <string name="description_read_counter">This example reads an Ultralight C tag type and shows the value of the counter(s).\n\nWhen a tag is discovered the data from all records will be read.</string>
     <string name="nfc_result">NFC read result</string>
-    <string name="header_write">This app works with a MIFARE Ultralight tag for writing</string>
-    <string name="description_write">This example writes data to a page on a MIFARE Ultralight tag</string>
+    <string name="header_write">This app works with a MIFARE Ultralight C tag for writing</string>
+    <string name="description_write">This example writes data to a page on a MIFARE Ultralight C tag</string>
     <string name="action_licenses">Used material and their licenses</string>
     <string name="header_write_counter">Increment the value of a counter</string>
-    <string name="description_write_counter">This example increases the counter on an Ultralight C or EV1 tag type and shows the value of the counter(s).\n\nWhen a tag is discovered the data from all records will be read.</string>
+    <string name="description_write_counter">This example increases the counter on an Ultralight C tag type and shows the value of the counter(s).\n\nWhen a tag is discovered the data from all records will be read.</string>
     <string name="write_counter_warning">The increasing of a counter is not reversible and not resettable, so please act with caution</string>
 </resources>
