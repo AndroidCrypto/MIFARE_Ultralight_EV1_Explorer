@@ -135,7 +135,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-                android:text="SPAN"
+                android:text="The tag content is shown here"
                 android:textAlignment="center"
                 android:textSize="18sp"
                 android:textStyle="normal" />
@@ -145,7 +145,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-                android:text="SPAN LEGEND"
+                android:text="The legend is shown here"
                 android:textAlignment="center"
                 android:textSize="18sp"
                 android:textStyle="normal" />
