@@ -68,7 +68,6 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
     }
     private TextView readResult;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
-    private RadioButton rbNoCounterIncrease, rbCounterIncrease;
     private View loadingLayout;
     private String outputString = ""; // used for the UI output
     private NfcAdapter mNfcAdapter;
@@ -104,8 +103,6 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
         rbNoAuth = getView().findViewById(R.id.rbNoAuth);
         rbDefaultAuth = getView().findViewById(R.id.rbDefaultAuth);
         rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
-        rbNoCounterIncrease = getView().findViewById(R.id.rbNoCounterIncrease);
-        rbCounterIncrease = getView().findViewById(R.id.rbCounterIncrease);
         loadingLayout = getView().findViewById(R.id.loading_layout);
     }
 
