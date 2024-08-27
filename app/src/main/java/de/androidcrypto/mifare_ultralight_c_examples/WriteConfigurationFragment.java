@@ -3,6 +3,8 @@ package de.androidcrypto.mifare_ultralight_c_examples;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.doAuthenticateUltralightCDefault;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth0UltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth1UltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.hexStringToByteArray;
@@ -19,6 +21,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -68,6 +73,8 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
     }
     private TextView readResult;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
+    private RadioButton rbMemoryWriteProtection, rbMemoryWriteReadProtection;
+    private AutoCompleteTextView authenticationRequiredPage;
     private View loadingLayout;
     private String outputString = ""; // used for the UI output
     private NfcAdapter mNfcAdapter;
@@ -103,7 +110,21 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
         rbNoAuth = getView().findViewById(R.id.rbNoAuth);
         rbDefaultAuth = getView().findViewById(R.id.rbDefaultAuth);
         rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
+        rbMemoryWriteProtection = getView().findViewById(R.id.rbMemoryWriteProtection);
+        rbMemoryWriteReadProtection = getView().findViewById(R.id.rbMemoryWriteReadProtection);
         loadingLayout = getView().findViewById(R.id.loading_layout);
+
+        // The minimum number of pages to write is 12 (= 48 bytes user memory)
+        // as we are writing a 16 bytes long data we do need 4 pages to write the data and
+        // therefore when writing to page 9 we will write to pages 9, 10, 11 and 12
+        String[] type = new String[]{ "3", "4", "5", "6", "7", "10", "30", "39", "40", "48"};
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+                getView().getContext(),
+                R.layout.drop_down_item,
+                type);
+        authenticationRequiredPage = getView().findViewById(R.id.authRequiredPage);
+        authenticationRequiredPage.setText(type[9]);
+        authenticationRequiredPage.setAdapter(arrayAdapter);
     }
 
     @Override
@@ -184,7 +205,7 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
 
                 if (rbNoAuth.isChecked()) {
                     writeToUiAppend("No Authentication requested");
-                    authSuccess = false;
+                    authSuccess = true;
                 } else if (rbDefaultAuth.isChecked()) {
                     writeToUiAppend("Authentication with Default Key requested");
                     authSuccess = doAuthenticateUltralightCDefault(nfcA);
@@ -194,6 +215,27 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                     authSuccess = authenticateUltralightC(nfcA, customAuthKey);
                     writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
                 }
+
+                // get page for memory protection start
+                String choiceString = authenticationRequiredPage.getText().toString();
+                byte defineAuth0Page = (byte) Integer.parseInt(choiceString);
+
+                // write Auth0
+                success = writeAuth0UltralightC(nfcA, defineAuth0Page);
+                writeToUiAppend("Status of writeAuth0 command to page 32: " + success);
+
+                // write Auth1
+                boolean defineWriteOnlyRestricted;
+                if (rbMemoryWriteProtection.isChecked()) {
+                    defineWriteOnlyRestricted = true;
+                } else {
+                    defineWriteOnlyRestricted = false;
+                }
+                //boolean defineWriteOnlyRestricted = true;
+                success = writeAuth1UltralightC(nfcA, defineWriteOnlyRestricted);
+                writeToUiAppend("Status of writeAuth1 command to WriteRestrictedOnly: " + success);
+
+
             }
         } catch (Exception e) {
             writeToUiAppend("Exception on connection: " + e.getMessage());

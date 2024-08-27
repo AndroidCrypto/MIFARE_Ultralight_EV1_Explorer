@@ -19,7 +19,10 @@
                 android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/header_read"
                 android:textAlignment="center"
                 android:textSize="20sp"
@@ -29,8 +32,11 @@
                 android:id="@+id/tvInformation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:text="@string/description_read"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/description_write_configuration"
                 android:textAlignment="center"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -66,6 +72,73 @@
 
             </RadioGroup>
 
+            <TextView
+                android:id="@+id/tvInformationPage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/description_write_page"
+                android:textAlignment="center"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:hint="Select Page">
+
+                <AutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/authRequiredPage"
+                    android:inputType="none">
+                </AutoCompleteTextView>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/tvInformationMemoryAccess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="@string/description_memory_protection"
+                android:textAlignment="center"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbMemoryWriteProtection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Write only" />
+
+                <RadioButton
+                    android:id="@+id/rbMemoryWriteReadProtection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Write &amp; Read" />
+
+            </RadioGroup>
+
             <LinearLayout
                 android:id="@+id/loading_layout"
                 android:layout_width="wrap_content"
@@ -96,39 +169,13 @@
                 app:dividerThickness="4dp" />
 
             <TextView
-                android:id="@+id/tvSpan"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:text="The tag content is shown here"
-                android:textAlignment="center"
-                android:textSize="18sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:id="@+id/tvSpanLegend"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:text="The legend is shown here"
-                android:textAlignment="center"
-                android:textSize="18sp"
-                android:textStyle="normal" />
-
-            <com.google.android.material.divider.MaterialDivider
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                app:dividerInsetEnd="16dp"
-                app:dividerInsetStart="16dp"
-                app:dividerThickness="4dp" />
-
-            <TextView
                 android:id="@+id/tvReadResult"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/nfc_result"
                 android:textAlignment="textStart"
                 android:textSize="16sp"
