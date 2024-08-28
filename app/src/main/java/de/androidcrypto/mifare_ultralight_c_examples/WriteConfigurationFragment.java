@@ -2,6 +2,7 @@ package de.androidcrypto.mifare_ultralight_c_examples;
 
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.default2AuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.defaultAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.doAuthenticateUltralightCDefault;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth0UltralightC;
@@ -214,7 +215,9 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                     authSuccess = true;
                 } else if (rbDefaultAuth.isChecked()) {
                     writeToUiAppend("Authentication with Default Key requested");
-                    authSuccess = doAuthenticateUltralightCDefault(nfcA);
+                    authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
+                    //authSuccess = authenticateUltralightC(nfcA, default2AuthKey);
+                    //authSuccess = doAuthenticateUltralightCDefault(nfcA);
                     writeToUiAppend("authenticateUltralightC with defaultAuthKey success: " + authSuccess);
                 } else {
                     writeToUiAppend("Authentication with Custom Key requested");

@@ -55,6 +55,7 @@ public class MIFARE_Ultralight_C {
 
     public static final byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
     public static final byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] default2AuthKey = "BREAKMEIFYOUCAN!".getBytes(StandardCharsets.UTF_8);
 
     /**
      * auth code taken from  https://stackoverflow.com/a/44640515/8166854
@@ -320,6 +321,67 @@ public class MIFARE_Ultralight_C {
         Log.e(TAG, printData("dataPage45", dataPage45));
         Log.e(TAG, printData("dataPage46", dataPage46));
         Log.e(TAG, printData("dataPage47", dataPage47));
+        success = writePageMifareUltralightC(nfcA, 44, dataPage44, true);
+        if (!success) {
+            Log.e(TAG, "Error writing password step 1 page 44");
+            return false;
+        }
+        success = writePageMifareUltralightC(nfcA, 45, dataPage45, true);
+        if (!success) {
+            Log.e(TAG, "Error writing password step 2 page 45");
+            return false;
+        }
+        success = writePageMifareUltralightC(nfcA, 46, dataPage46, true);
+        if (!success) {
+            Log.e(TAG, "Error writing password step 3 page 46");
+            return false;
+        }
+        success = writePageMifareUltralightC(nfcA, 47, dataPage47, true);
+        if (!success) {
+            Log.e(TAG, "Error writing password step 4 page 47");
+            return false;
+        }
+        Log.e(TAG, "passwordOriginal: " + new String(password16bytes));
+        Log.e(TAG, printData("passwordInversed", passwordInversed));
+        Log.e(TAG, "passwordInversed: " + new String(passwordInversed));
+        Log.e(TAG, "passwordInvFinal: " + "IEMKAERB!NACUOYF");
+        Log.e(TAG, "passwordFinal   : " + new String(passwordFinal));
+        return true;
+    }
+
+    public static boolean writePasswordUltralightCTest(NfcA nfcA, byte[] password16bytes) {
+        if (password16bytes == null) {
+            Log.d(TAG, "password16bytes is NULL, aborted");
+            return false;
+        }
+        if (password16bytes.length != 16) {
+            Log.d(TAG, "password16bytes is not 16 bytes long, aborted");
+            return false;
+        }
+        // change the direction and position of elements
+        // e.g. byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
+        // step 1: inverse the bytes
+        byte[] passwordInversed = reverseByteArray(password16bytes);
+        // step 2: reorg of the data
+        byte[] passwordFinal = new byte[passwordInversed.length];
+        System.arraycopy(passwordInversed, 8, passwordFinal, 0, 8);
+        System.arraycopy(passwordInversed, 0, passwordFinal, 8, 8);
+        // step 3: write the data in 4 byte chunks
+        boolean success;
+        //success = false;
+        byte[] dataPage44 = Arrays.copyOfRange(passwordFinal, 0, 4);
+        byte[] dataPage45 = Arrays.copyOfRange(passwordFinal, 4, 8);
+        byte[] dataPage46 = Arrays.copyOfRange(passwordFinal, 8, 12);
+        byte[] dataPage47 = Arrays.copyOfRange(passwordFinal, 12, 16);
+        Log.e(TAG, printData("passwordInput", passwordFinal));
+        Log.e(TAG, printData("passwordFinal", passwordFinal));
+        Log.e(TAG, printData("dataPage44", dataPage44));
+        Log.e(TAG, printData("dataPage45", dataPage45));
+        Log.e(TAG, printData("dataPage46", dataPage46));
+        Log.e(TAG, printData("dataPage47", dataPage47));
+
+        if (nfcA == null) return false;
+
         success = writePageMifareUltralightC(nfcA, 44, dataPage44, true);
         if (!success) {
             Log.e(TAG, "Error writing password step 1 page 44");

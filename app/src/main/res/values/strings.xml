@@ -16,5 +16,5 @@
     <string name="description_write_page">Memory Protection: Select the page from where an authentication is required for writing or reading. Using \'48\' disables memory protection.</string>
     <string name="description_memory_protection"><![CDATA[Select if the  memory protection is for write access only or write & read access]]></string>
     <string name="description_write_configuration">This example expects a MIFARE Ultralight C type tag. It writes a new memory protection configuration to the tag.\n\nWhen a tag is discovered the new data will be written without any confirmation.</string>
-    <string name="description_change_password">Change the password of the tag, select the Default or a Custom password</string>
+    <string name="description_change_password">Change the password of the tag, select the new Default or a Custom password</string>
 </resources>

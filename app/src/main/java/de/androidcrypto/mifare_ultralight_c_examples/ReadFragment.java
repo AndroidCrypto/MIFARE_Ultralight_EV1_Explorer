@@ -11,6 +11,7 @@ import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth0UltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth1UltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePageMifareUltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePasswordUltralightCTest;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.combineByteArrays;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
@@ -171,6 +172,19 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             return;
         }
 
+        //writePasswordUltralightCTest(null, defaultAuthKey);
+        //writePasswordUltralightCTest(null, customAuthKey);
+/*
+        if (nfcA != null) {
+            try {
+                nfcA.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
+*/
+
         // get card details
         byte[] atqa = nfcA.getAtqa();
         int sak = nfcA.getSak();
@@ -247,22 +261,39 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 if (isUltralightC) {
                     if (rbNoAuth.isChecked()) {
                         writeToUiAppend("No Authentication requested");
-                        authSuccess = false;
+                        authSuccess = true;
                     } else if (rbDefaultAuth.isChecked()) {
                         writeToUiAppend("Authentication with Default Key requested");
-                        authSuccess = doAuthenticateUltralightCDefault();
-                        byte[] defaultKey = "BREAKMEIFYOUCAN!".getBytes(StandardCharsets.UTF_8);
+                        //authSuccess = doAuthenticateUltralightCDefault();
+                        //byte[] defaultKey = "BREAKMEIFYOUCAN!".getBytes(StandardCharsets.UTF_8);
                         //authSuccess = authenticateUltralightC(nfcA, defaultKey);
-                        //authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
+                        authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
                         writeToUiAppend("authenticateUltralightC with defaultAuthKey success: " + authSuccess);
                     } else {
                         writeToUiAppend("Authentication with Custom Key requested");
-                        //authSuccess = authenticateUltralightC(nfcA, convertPassword(customAuthKey));
                         authSuccess = authenticateUltralightC(nfcA, customAuthKey);
+                        //authSuccess = doAuthenticateUltralightCCustom();
+                        //authSuccess = authenticateUltralightC(nfcA, customAuthKey);
                         writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
                     }
                 }
 
+                if (!authSuccess) {
+                    writeToUiAppend("The authentication was not successful, operation aborted.");
+                    returnOnNotSuccess();
+                }
+
+/*
+                byte[] p01 = "1234".getBytes(StandardCharsets.UTF_8);
+                byte[] p02 = "5678".getBytes(StandardCharsets.UTF_8);
+                byte[] p03 = "9012".getBytes(StandardCharsets.UTF_8);
+                byte[] p04 = "3456".getBytes(StandardCharsets.UTF_8);
+                byte[] p05 = "6543".getBytes(StandardCharsets.UTF_8);
+                byte[] p06 = "2109".getBytes(StandardCharsets.UTF_8);
+                byte[] p07 = "8765".getBytes(StandardCharsets.UTF_8);
+                byte[] p08 = "4321".getBytes(StandardCharsets.UTF_8);
+*/
+/*
                 byte[] p01 = "BREA".getBytes(StandardCharsets.UTF_8);
                 byte[] p02 = "KMEI".getBytes(StandardCharsets.UTF_8);
                 byte[] p03 = "FYOU".getBytes(StandardCharsets.UTF_8);
@@ -271,12 +302,16 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 byte[] p06 = "UOYF".getBytes(StandardCharsets.UTF_8);
                 byte[] p07 = "IEMK".getBytes(StandardCharsets.UTF_8);
                 byte[] p08 = "AERB".getBytes(StandardCharsets.UTF_8);
+
+
+ */
 /*
                 p01 = p05.clone();
                 p02 = p06.clone();
                 p03 = p07.clone();
                 p04 = p08.clone();
   */
+                /*
                 byte[] d01 = combineByteArrays(p01,p02,p03,p04);
                 byte[] d02 = combineByteArrays(p01,p02,p04,p03);
                 byte[] d03 = combineByteArrays(p01,p03,p02,p04);
@@ -301,7 +336,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 byte[] d22 = combineByteArrays(p04,p02,p04,p01);
                 byte[] d23 = combineByteArrays(p04,p03,p01,p02);
                 byte[] d24 = combineByteArrays(p04,p03,p02,p01);
-/*
+
                 Log.d(TAG, "************ Auth Test Start ****************");
                 Log.d(TAG, "auth d01: " + authenticateUltralightC(nfcA, d01));
                 Log.d(TAG, printData("d01", d01));
@@ -335,8 +370,9 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
 
                     Log.d(TAG, "************ Auth Test Stopp ****************");
 
-                if (isUltralightC) return;;
+                if (isUltralightC) return;
 */
+
                 // read complete memory with colored data
                 byte[] memoryContent = readCompleteContent(nfcA);
                 String memoryDumpString = HexDumpOwn.prettyPrint(memoryContent);
@@ -549,6 +585,29 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
         boolean authSuccess = false;
         try {
             authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
+            return authSuccess;
+        } catch (Exception e) {
+            Log.e(TAG, "doAuthenticateUltralightCDefault Exception: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean doAuthenticateUltralightCCustom() {
+        Log.e(TAG, printData("mifareULCCustomKey", customAuthKey)); // 31323334353637383930313233343536
+        // public static final byte[] customAuthKey
+        //    = "1234567890123456".getBytes(StandardCharsets. UTF_8)
+        // public static final byte[] customAuthKey
+        //    = "12345678 90123456".getBytes(StandardCharsets. UTF_8)
+        byte[] customAuthKey2 = "8765432165432109".getBytes(StandardCharsets.UTF_8);
+        System.out.println("###" + printData("mifareULCCustomKey2", customAuthKey2) + "###");
+        //Log.d(TAG, "mifareULCDefaultKey:" + new String(defaultAuthKey, StandardCharsets.UTF_8) + "###");
+        // mifareULCDefaultKey length: 16 data: 49454d4b41455242214e4143554f5946
+        // mifareULCDefaultKey: IEMKAERB!NACUOYF###
+        //customAuthKey = hexStringToByteArray("");
+        //authenticateUltralightC(nfcA, authKey);
+        boolean authSuccess = false;
+        try {
+            authSuccess = authenticateUltralightC(nfcA, customAuthKey2);
             return authSuccess;
         } catch (Exception e) {
             Log.e(TAG, "doAuthenticateUltralightCDefault Exception: " + e.getMessage());
