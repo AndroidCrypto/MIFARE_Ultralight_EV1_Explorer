@@ -55,6 +55,7 @@ public class MIFARE_Ultralight_C {
 
     public static final byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
     public static final byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
+
     /**
      * auth code taken from  https://stackoverflow.com/a/44640515/8166854
      * Note: this is a modified code without Apache Commons Lang.

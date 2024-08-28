@@ -1,6 +1,7 @@
 package de.androidcrypto.mifare_ultralight_c_examples;
 
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.convertPassword;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.defaultAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.getCounterValue;
@@ -256,6 +257,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                         writeToUiAppend("authenticateUltralightC with defaultAuthKey success: " + authSuccess);
                     } else {
                         writeToUiAppend("Authentication with Custom Key requested");
+                        //authSuccess = authenticateUltralightC(nfcA, convertPassword(customAuthKey));
                         authSuccess = authenticateUltralightC(nfcA, customAuthKey);
                         writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
                     }

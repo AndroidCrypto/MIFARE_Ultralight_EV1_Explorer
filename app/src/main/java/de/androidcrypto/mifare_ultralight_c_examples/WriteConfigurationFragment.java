@@ -2,9 +2,11 @@ package de.androidcrypto.mifare_ultralight_c_examples;
 
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.defaultAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.doAuthenticateUltralightCDefault;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth0UltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth1UltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePasswordUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.hexStringToByteArray;
@@ -74,6 +76,7 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
     private TextView readResult;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
     private RadioButton rbMemoryWriteProtection, rbMemoryWriteReadProtection;
+    private RadioButton rbChangePasswordNone, rbChangePasswordDefault, rbChangePasswordCustom;
     private AutoCompleteTextView authenticationRequiredPage;
     private View loadingLayout;
     private String outputString = ""; // used for the UI output
@@ -85,10 +88,10 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
     String tagIdString = "";
     String tagTypeString = "";
     private static final int REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 100;
-    Context contextSave;
+    private Context contextSave;
     private byte[][] pagesComplete;
     private int pagesToRead;
-    byte[] versionData;
+    private byte[] versionData;
     private boolean isUltralightC = false;
     private boolean isUltralightEv1 = false;
     private int counter0 = 0;
@@ -112,6 +115,9 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
         rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
         rbMemoryWriteProtection = getView().findViewById(R.id.rbMemoryWriteProtection);
         rbMemoryWriteReadProtection = getView().findViewById(R.id.rbMemoryWriteReadProtection);
+        rbChangePasswordNone = getView().findViewById(R.id.rbChangePasswordNone);
+        rbChangePasswordDefault = getView().findViewById(R.id.rbChangePasswordDefault);
+        rbChangePasswordCustom = getView().findViewById(R.id.rbChangePasswordCustom);
         loadingLayout = getView().findViewById(R.id.loading_layout);
 
         // The minimum number of pages to write is 12 (= 48 bytes user memory)
@@ -235,7 +241,19 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                 success = writeAuth1UltralightC(nfcA, defineWriteOnlyRestricted);
                 writeToUiAppend("Status of writeAuth1 command to WriteRestrictedOnly: " + success);
 
-
+                // change password - options are no change, change to default or change to custom
+                if (rbChangePasswordNone.isChecked()) {
+                    // no password change
+                    writeToUiAppend("No password change requested");
+                } else if (rbChangePasswordDefault.isChecked()) {
+                    // change password to default
+                    success = writePasswordUltralightC(nfcA, defaultAuthKey);
+                    writeToUiAppend("Change the password to DEFAULT password: " + success);
+                } else {
+                    // change password to custom
+                    success = writePasswordUltralightC(nfcA, customAuthKey);
+                    writeToUiAppend("Change the password to CUSTOM password: " + success);
+                }
             }
         } catch (Exception e) {
             writeToUiAppend("Exception on connection: " + e.getMessage());
