@@ -57,7 +57,6 @@ public class MIFARE_Ultralight_C {
 
     public static final byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
     public static final byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
-    public static final byte[] default2AuthKey = "BREAKMEIFYOUCAN!".getBytes(StandardCharsets.UTF_8);
 
     public static boolean identifyUltralightFamily(NfcA nfcA) {
         // get card details
@@ -92,15 +91,12 @@ public class MIFARE_Ultralight_C {
             byte[] rndA = new byte[8];
             generateRandom(rndA);
             Log.d(TAG, " - RndA: " + bytesToHexNpe(rndA));
-            //byte[] encRndArotPrime = transmitRaw(ArrayUtils.addAll(new byte[] {(byte) 0xAF}, desEncrypt(key, ArrayUtils.addAll(rndA, rndBrot))));
-            //byte[] rndARndBrot = ArrayUtils.addAll(rndA, rndBrot);
             byte[] rndARndBrot = combineByteArrays(rndA, rndBrot);
-            Log.d(TAG, printData("rndARndBrot", rndARndBrot));
+            Log.d(TAG, " - rndARndBrot: " + bytesToHexNpe(rndARndBrot));
             byte[] encRndARndBrot = desEncrypt(key, rndARndBrot);
-            Log.d(TAG, printData("encRndARndBrot", encRndARndBrot));
+            Log.d(TAG, " - encRndARndBrot: " + bytesToHexNpe(encRndARndBrot));
             byte[] dataToSend = combineByteArrays(new byte[]{(byte) 0xAF}, encRndARndBrot);
-            Log.d(TAG, printData("dataToSend", dataToSend));
-            // AF0A638559FC7737F9F15D7862EBBE967A
+            Log.d(TAG, " - dataToSend: " + bytesToHexNpe(dataToSend));
             byte[] encRndArotPrime;
             try {
                 encRndArotPrime = nfcA.transceive(dataToSend);
@@ -110,7 +106,7 @@ public class MIFARE_Ultralight_C {
             }
             Log.d(TAG, "encRndArotPrime: " + bytesToHexNpe(encRndArotPrime));
             if ((encRndArotPrime.length != 9) || (encRndArotPrime[0] != 0x00)) {
-                Log.d(TAG, "RuntimeException (Invalid response!)");
+                Log.e(TAG, "RuntimeException (Invalid response!)");
                 return false;
             }
             encRndArotPrime = Arrays.copyOfRange(encRndArotPrime, 1, 9);
@@ -118,7 +114,7 @@ public class MIFARE_Ultralight_C {
             byte[] rndArotPrime = desDecrypt(key, encRndArotPrime);
             Log.d(TAG, " - RndArot': " + bytesToHexNpe(rndArotPrime));
             if (!Arrays.equals(rotateLeft(rndA), rndArotPrime)) {
-                Log.d(TAG, "RuntimeException (Card authentication failed)");
+                Log.e(TAG, "RuntimeException (Card authentication failed)");
                 return false;
             } else {
                 Log.d(TAG, "Card authentication success");

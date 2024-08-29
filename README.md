@@ -81,6 +81,13 @@ Minimum SDK is 21 (Android 5)
 
 The Ultralight C tag uses a Triple DES authentication scheme with a 2 DES keys model, so in the end it uses a 16 bytes long TDES key. 
 
+I'm using 2 predefined keys in the app:
+
+```plaintext
+byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
+byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
+```
+
 ### Counter on Mifare Ultralight-C:
 ```plaintext
 7.5.11 Counter
