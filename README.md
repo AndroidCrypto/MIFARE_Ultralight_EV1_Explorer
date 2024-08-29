@@ -29,7 +29,7 @@ There are 5 icons in the "Bottom Navigation Bar":
 
 ### Home Fragment:
 
-![Home screen](screenshots/small/home_01.png)
+![Home screen](/screenshots/small/home_01.png)
 
 
 ###
