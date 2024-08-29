@@ -55,22 +55,26 @@ There are 5 icons in the "Bottom Navigation Bar":
 
 ![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_03.png)
 
+## Material used for this app
 
-### Material used for this app
-
-Icons: https://www.freeiconspng.com/images/nfc-icon
+**Icons**: https://www.freeiconspng.com/images/nfc-icon
 
 Nfc Simple PNG Transparent Background: https://www.freeiconspng.com/img/20581
 
 <a href="https://www.freeiconspng.com/img/20581">Nfc Png Simple</a>
 
-https://www.asiarfid.com/how-to-choose-rfid-mifare-chip.html
+**Sounds**: Sound files downloaded from Material Design Sounds: https://m2.material.io/design/sound/sound-resources.html 
 
 ## Technical details
 
 Minimum SDK is 21 (Android 5)
 
-## Counter on Mifare Ultralight-C:
+### Authentication of a MIFARE Ultralight C:
+
+The Ultralight C tag uses a Triple DES authentication scheme with a 2 DES keys model, so in the end it uses a 16 bytes long key. 
+
+
+### Counter on Mifare Ultralight-C:
 ```plaintext
 7.5.11 Counter
 The MF0ICU2 features a 16-bit one-way counter, located at the first two bytes of page 
