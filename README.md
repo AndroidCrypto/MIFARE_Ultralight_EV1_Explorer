@@ -1,19 +1,15 @@
 # MIFARE Ultralight C Examples
 
-## Note on this app
+## Description
 
-At the moment this app is just a stub with no running code for a MIFARE Ultralight NFC tag. I will add the code
-for these tags soon.
+This app reads and writes data to NXP's MIFARE Ultralight C tag. It is tested with a fabric new Ultralight C type.
 
-### Description
+**Please do not use a MIFARE Ultralight or Ultralight EV1 tag with this app** - these have a similar command set but are different 
+in Authentication, page locking, counter and other details. Using these tag may brick your tag.
 
-This app reads and writes data to NXP's MIFARE Ultralight C tag. It is tested with the Ultralight C type so
-I cannot guarantee that it works on the other type also.
+## Data Sheet
 
-**Please do not use a MIFARE Ultralight EV1 tag with this app** - these have a similar command set but are different 
-in Authentication, page locking, counter and other details.
-
-The Mifare Ultralight C datasheet is a good source for all questions regarding programming:
+The Mifare Ultralight C datasheet is a good source for all questions regarding programming this tag:
 
 MIFARE Ultralight C: Get the datasheet here MF0ICU2: https://www.nxp.com/docs/en/data-sheet/MF0ICU2.pdf
 
@@ -23,13 +19,20 @@ The datasheet is available in the docs folder of this repository, but it is alwa
 
 There are 5 icons in the "Bottom Navigation Bar":
 
-1) Home:
-2) Read:
-3) Red Value:
-4) Write:
-5) Write Value:
+1) Home: gives an overview about the app and shows the license terms of material used for the app.
+2) Read: tries to read the complete content of the tag and display the data in a colored dump.
+3) Write Counter: increases the 16-bit one way counter by "1".
+4) Write Data: writes up to 16 characters to 4 subsequent pages of the user memory. Another option is to write a current timestamp to the tag.
+5) Write Configuration: Select the page a memory protection is active. Selecting page 48 disables any memory protection. Select the mode of memory protection: write access only or read and write access. Select if you want to clear the user memory. The last option is to leave or change the current password (change to the Default or Custom key).
+
+## Screenshots of the app:
+
+### Home Fragment:
+
+![Home screen](screenshots/small/home_01.png)
 
 
+###
 
 Icons: https://www.freeiconspng.com/images/nfc-icon
 
