@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MIFARE_Ultralight_C_Explorer"
+rootProject.name = "MIFARE_Ultralight_EV1_Explorer"
 include ':app'

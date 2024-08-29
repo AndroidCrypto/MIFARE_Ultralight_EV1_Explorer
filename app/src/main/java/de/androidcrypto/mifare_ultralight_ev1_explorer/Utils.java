@@ -1,4 +1,4 @@
-package de.androidcrypto.mifare_ultralight_c_explorer;
+package de.androidcrypto.mifare_ultralight_ev1_explorer;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 

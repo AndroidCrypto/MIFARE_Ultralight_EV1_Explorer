@@ -1,19 +1,19 @@
-# MIFARE Ultralight C Explorer
+# MIFARE Ultralight EV1 Explorer
 
 ## Description
 
-This app reads and writes data to NXP's MIFARE Ultralight C tag. It is tested with a fabric new Ultralight C type.
+This app reads and writes data to NXP's MIFARE Ultralight EV1 tag. It is tested with a fabric new Ultralight EV1 type.
 
-**Please do not use a MIFARE Ultralight or Ultralight EV1 tag with this app** - these have a similar command set but are different 
+**Please do not use a MIFARE Ultralight or Ultralight C tag with this app** - these have a similar command set but are different 
 in Authentication, page locking, counter and other details. Using these tag may brick your tag.
 
-The tutorial to this app is available on medium.com: https://medium.com/@androidcrypto/explore-a-mifare-ultralight-c-nfc-tag-android-java-e6408b1030cf
+The tutorial to this app is available on medium.com: ... please be patient
 
 ## Data Sheet
 
-The Mifare Ultralight C datasheet is a good source for all questions regarding programming this tag:
+The Mifare Ultralight EV1 datasheet is a good source for all questions regarding programming this tag:
 
-MIFARE Ultralight C: Get the datasheet here MF0ICU2: https://www.nxp.com/docs/en/data-sheet/MF0ICU2.pdf
+MIFARE Ultralight EV1: Get the datasheet here MF0ICU2: https://www.nxp.com/docs/en/data-sheet/MF0ICU2.pdf
 
 The datasheet is available in the docs folder of this repository, but it is always better to get one from the origin source.
 
@@ -31,31 +31,25 @@ There are 5 icons in the "Bottom Navigation Bar":
 
 ### Home Fragment:
 
-![Home screen of the app](screenshots/small/app_home_01.png)
+
 
 ### Read Fragment
 
 ![Screen of the Read Fragment](screenshots/small/app_read_01.png)
 
-![Screen of the Read Fragment](screenshots/small/app_read_02.png)
 
-![Screen of the Read Fragment](screenshots/small/app_read_03.png)
 
 ### Write Counter Fragment
 
-![Screen of the Write Counter Fragment](screenshots/small/app_write_counter_01.png)
+
 
 ### Write Data Fragment
 
-![Screen of the Write Data Fragment](screenshots/small/app_write_data_01.png)
+
 
 ### Write Configuration Fragment
 
-![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_01.png)
 
-![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_02.png)
-
-![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_03.png)
 
 ## What is not possible with this app ?
 
@@ -77,9 +71,9 @@ Nfc Simple PNG Transparent Background: https://www.freeiconspng.com/img/20581
 
 Minimum SDK is 21 (Android 5)
 
-### Authentication of a MIFARE Ultralight C:
+### Authentication of a MIFARE Ultralight EV1:
 
-The Ultralight C tag uses a Triple DES authentication scheme with a 2 DES keys model, so in the end it uses a 16 bytes long TDES key. 
+The Ultralight EV1 tag uses a Triple DES authentication scheme with a 2 DES keys model, so in the end it uses a 16 bytes long TDES key. 
 
 I'm using 2 predefined keys in the app:
 

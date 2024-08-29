@@ -1,13 +1,13 @@
-package de.androidcrypto.mifare_ultralight_c_explorer;
+package de.androidcrypto.mifare_ultralight_ev1_explorer;
 
-import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.authenticateUltralightC;
-import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.customAuthKey;
-import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.doAuthenticateUltralightCDefault;
-import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.getCounterValue;
-import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.increaseCounterValueByOne;
-import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.bytesToHexNpe;
-import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.doVibrate;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_C.authenticateUltralightC;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_C.customAuthKey;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_C.doAuthenticateUltralightCDefault;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_C.getCounterValue;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_C.identifyUltralightFamily;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_C.increaseCounterValueByOne;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.nfc.NfcAdapter;
