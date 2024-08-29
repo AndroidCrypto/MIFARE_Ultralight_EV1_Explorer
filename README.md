@@ -31,8 +31,32 @@ There are 5 icons in the "Bottom Navigation Bar":
 
 ![Home screen of the app](screenshots/small/app_home_01.png)
 
+### Read Fragment
 
-###
+![Screen of the Read Fragment](screenshots/small/app_read_01.png)
+
+![Screen of the Read Fragment](screenshots/small/app_read_02.png)
+
+![Screen of the Read Fragment](screenshots/small/app_read_03.png)
+
+### Write Counter Fragment
+
+![Screen of the Write Counter Fragment](screenshots/small/app_write_counter_01.png)
+
+### Write Data Fragment
+
+![Screen of the Write Data Fragment](screenshots/small/app_write_data_01.png)
+
+### Write Configuration Fragment
+
+![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_01.png)
+
+![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_02.png)
+
+![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_03.png)
+
+
+### Material used for this app
 
 Icons: https://www.freeiconspng.com/images/nfc-icon
 
