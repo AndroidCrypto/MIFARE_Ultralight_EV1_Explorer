@@ -1,7 +1,5 @@
-package de.androidcrypto.mifare_ultralight_c_examples;
+package de.androidcrypto.mifare_ultralight_c_explorer;
 
-import android.content.Context;
-import android.content.pm.FeatureInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;

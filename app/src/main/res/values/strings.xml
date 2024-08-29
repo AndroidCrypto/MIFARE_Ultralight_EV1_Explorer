@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MIFARE Ultralight C Example</string>
+    <string name="app_name">MIFARE Ultralight C Explorer</string>
     <string name="home_description">This application reads and writes data from/to a MIFARE Ultralight C NFC tag.</string>
     <string name="home_fragments">There are 5 icons to click on:\n1 home = this page\n2 read data with or without authentication\n3 write counter = increment the counter\n4 write data\n5  write configuration = changes the configuration of the tag (e.g. authentication key, write and/or read authentication, memory clearing, change password)</string>
     <string name="header_read">This app works with a MIFARE Ultralight C tag for reading</string>

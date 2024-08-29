@@ -1,13 +1,12 @@
-package de.androidcrypto.mifare_ultralight_c_examples;
+package de.androidcrypto.mifare_ultralight_c_explorer;
 
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.combineByteArrays;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.hexStringToByteArray;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.intFrom2ByteArrayInversed;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.printData;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.reverseByteArray;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.bytesToHexNpe;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.combineByteArrays;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.hexStringToByteArray;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.intFrom2ByteArrayInversed;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.printData;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.reverseByteArray;
 
-import android.nfc.Tag;
 import android.nfc.tech.NfcA;
 import android.util.Log;
 

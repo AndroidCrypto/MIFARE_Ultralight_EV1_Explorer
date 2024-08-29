@@ -1,4 +1,4 @@
-package de.androidcrypto.mifare_ultralight_c_examples;
+package de.androidcrypto.mifare_ultralight_c_explorer;
 
 import android.os.Bundle;
 

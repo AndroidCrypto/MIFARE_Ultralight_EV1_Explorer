@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'de.androidcrypto.mifare_ultralight_c_examples'
+    namespace 'de.androidcrypto.mifare_ultralight_c_explorer'
     compileSdk 34
 
     defaultConfig {
-        applicationId "de.androidcrypto.mifare_ultralight_c_examples"
+        applicationId "de.androidcrypto.mifare_ultralight_c_explorer"
         minSdk 21
         targetSdk 34
         versionCode 1

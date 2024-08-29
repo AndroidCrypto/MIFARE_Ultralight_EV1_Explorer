@@ -1,15 +1,15 @@
-package de.androidcrypto.mifare_ultralight_c_examples;
+package de.androidcrypto.mifare_ultralight_c_explorer;
 
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.defaultAuthKey;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth0UltralightC;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth1UltralightC;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePageMifareUltralightC;
-import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePasswordUltralightC;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.authenticateUltralightC;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.customAuthKey;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.defaultAuthKey;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.identifyUltralightFamily;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.writeAuth0UltralightC;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.writeAuth1UltralightC;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.writePageMifareUltralightC;
+import static de.androidcrypto.mifare_ultralight_c_explorer.MIFARE_Ultralight_C.writePasswordUltralightC;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.bytesToHexNpe;
+import static de.androidcrypto.mifare_ultralight_c_explorer.Utils.doVibrate;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
