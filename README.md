@@ -71,8 +71,7 @@ Minimum SDK is 21 (Android 5)
 
 ### Authentication of a MIFARE Ultralight C:
 
-The Ultralight C tag uses a Triple DES authentication scheme with a 2 DES keys model, so in the end it uses a 16 bytes long key. 
-
+The Ultralight C tag uses a Triple DES authentication scheme with a 2 DES keys model, so in the end it uses a 16 bytes long TDES key. 
 
 ### Counter on Mifare Ultralight-C:
 ```plaintext
