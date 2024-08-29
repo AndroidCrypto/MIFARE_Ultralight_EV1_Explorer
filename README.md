@@ -7,6 +7,8 @@ This app reads and writes data to NXP's MIFARE Ultralight C tag. It is tested wi
 **Please do not use a MIFARE Ultralight or Ultralight EV1 tag with this app** - these have a similar command set but are different 
 in Authentication, page locking, counter and other details. Using these tag may brick your tag.
 
+The tutorial to this app is available on medium.com: please be patient...
+
 ## Data Sheet
 
 The Mifare Ultralight C datasheet is a good source for all questions regarding programming this tag:
