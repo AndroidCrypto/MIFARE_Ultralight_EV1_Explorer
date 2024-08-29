@@ -1,0 +1,112 @@
+** TagInfo Scan (version 5.0.0) 29-Aug.-24 12:56:18 **
+Report Type: -- IC INFO ------------------------------
+
+# IC Manufacturer:
+Most probably NXP Semiconductors
+
+# IC Type:
+MIFARE Ultralight C (MF0ICU2)
+ 
+NOTE : Please consider MIFARE products with Originality Signature functionalities for future applications.
+
+-- NDEF ------------------------------
+
+# No NDEF Data Storage Present:
+Maximum NDEF storage size after format: 137 bytes
+
+-- EXTRA ------------------------------
+
+# Memory Information:
+192 bytes total memory
+* 48 pages, with 4 bytes per page
+* 144 bytes user memory (36 pages)
+
+# Authentication Information:
+Default sample key
+
+# Originality Check (symmetric):
+Originality check not supported
+
+# TagInfo Version:
+Version :5.0.0
+
+# Device Info:
+Device Model :samsung ( SM-A515F )
+Android OS Version :13
+
+-- FULL SCAN ------------------------------
+
+# Technologies Supported:
+ISO/IEC 14443-3 (Type A) compatible
+ISO/IEC 14443-2 (Type A) compatible
+
+# Android Technology Information:
+Tag description:
+* TAG: Tech [android.nfc.tech.NfcA, android.nfc.tech.MifareUltralight, android.nfc.tech.NdefFormatable]
+* Maximum transceive length: 253 bytes
+* Default maximum transceive time-out: 618 ms
+MIFARE Classic support present in Android
+
+# Detailed Protocol Information:
+ID: 04:1F:80:AA:98:78:80
+ATQA: 0x4400
+SAK: 0x00
+
+# Memory Content:
+[00] *  04:1F:80 13 (UID0-UID2, BCC0)
+[01] *  AA:98:78:80 (UID3-UID6)
+[02] .  CA 48 00 00 (BCC1, INT, LOCK0-LOCK1)
+[03] .  00:00:00:00 (OTP0-OTP3)
+[04] .  32 34 30 38 |2408|
+[05] .  32 39 20 31 |29␠1|
+[06] .  32 3A 35 35 |2:55|
+[07] .  3A 34 30 20 |:40␠|
+[08] .  73 6F 6D 65 |some|
+[09] .  20 64 61 74 |␠dat|
+[0A] .  61 20 6F 6E |a␠on|
+[0B] .  20 74 61 67 |␠tag|
+[0C] .  00 00 00 00 |␀␀␀␀|
+[0D] .  00 00 00 00 |␀␀␀␀|
+[0E] .  00 00 00 00 |␀␀␀␀|
+[0F] .  00 00 00 00 |␀␀␀␀|
+[10] .  00 00 00 00 |␀␀␀␀|
+[11] .  00 00 00 00 |␀␀␀␀|
+[12] .  00 00 00 00 |␀␀␀␀|
+[13] .  00 00 00 00 |␀␀␀␀|
+[14] .  00 00 00 00 |␀␀␀␀|
+[15] .  00 00 00 00 |␀␀␀␀|
+[16] .  00 00 00 00 |␀␀␀␀|
+[17] .  00 00 00 00 |␀␀␀␀|
+[18] .  00 00 00 00 |␀␀␀␀|
+[19] .  00 00 00 00 |␀␀␀␀|
+[1A] .  00 00 00 00 |␀␀␀␀|
+[1B] .  00 00 00 00 |␀␀␀␀|
+[1C] .  00 00 00 00 |␀␀␀␀|
+[1D] .  00 00 00 00 |␀␀␀␀|
+[1E] .  00 00 00 00 |␀␀␀␀|
+[1F] .  00 00 00 00 |␀␀␀␀|
+[20] .  00 00 00 00 |␀␀␀␀|
+[21] .  00 00 00 00 |␀␀␀␀|
+[22] .  00 00 00 00 |␀␀␀␀|
+[23] .  00 00 00 00 |␀␀␀␀|
+[24] .  00 00 00 00 |␀␀␀␀|
+[25] .  00 00 00 00 |␀␀␀␀|
+[26] .  00 00 00 00 |␀␀␀␀|
+[27] .  00 00 00 00 |␀␀␀␀|
+[28] .  00 00 -- -- (LOCK2-LOCK3)
+[29] .  0E 00 -- -- (CNT0-CNT1, value: 14)
+[2A] .  30 -- -- -- (AUTH0)
+[2B] .  01 -- -- -- (AUTH1)
+[2C] .- 42 52 45 41 |BREA|
+[2D] .- 4B 4D 45 49 |KMEI|
+[2E] .- 46 59 4F 55 |FYOU|
+[2F] .- 43 41 4E 21 |CAN!|
+
+  *:locked & blocked, x:locked,
+  +:blocked, .:un(b)locked, ?:unknown
+  r:readable (write-protected),
+  p:password protected, -:write-only
+  P:password protected write-only
+
+--------------------------------------
+

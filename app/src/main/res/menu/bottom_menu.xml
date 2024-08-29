@@ -12,17 +12,18 @@
         android:title="Read" />
 
     <item
-        android:id="@+id/write_configuration"
+        android:id="@+id/write_counter"
         android:icon="@drawable/nfc_icon_w2"
-        android:title="Write Config" />
+        android:title="Incr Counter" />
 
     <item
         android:id="@+id/write"
         android:icon="@drawable/nfc_icon_w2"
-        android:title="Write" />
+        android:title="Write Data" />
 
     <item
-        android:id="@+id/write_counter"
+        android:id="@+id/write_configuration"
         android:icon="@drawable/nfc_icon_w2"
-        android:title="Write Counter" />
+        android:title="Write Config" />
+
 </menu>

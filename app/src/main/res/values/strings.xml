@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">MIFARE Ultralight C Example</string>
     <string name="home_description">This application reads and writes data from/to a MIFARE Ultralight C NFC tag.</string>
-    <string name="home_fragments">There are 5 icons to click on:\n1 home = this page\n2 read data with or without authentication\n3 write configuration = changes the configuration of the tag (e.g. authentication key, write and/or read authentication)\n4 write data\n5 write counter = increment the counter</string>
+    <string name="home_fragments">There are 5 icons to click on:\n1 home = this page\n2 read data with or without authentication\n3 write counter = increment the counter\n4 write data\n5  write configuration = changes the configuration of the tag (e.g. authentication key, write and/or read authentication, memory clearing, change password)</string>
     <string name="header_read">This app works with a MIFARE Ultralight C tag for reading</string>
-    <string name="description_read">This example expects a MIFARE Ultralight type tag. The tag should use only the well known keys A and B for authentication.\n\nWhen a tag is discovered the data from all records will be read.</string>
+    <string name="description_read">This example expects a MIFARE Ultralight type tag.\n\nWhen a tag is discovered the data from all records will be read.</string>
     <string name="header_read_counter">Read the counter</string>
     <string name="description_read_counter">This example reads an Ultralight C tag type and shows the value of the counter(s).\n\nWhen a tag is discovered the data from all records will be read.</string>
     <string name="nfc_result">NFC read result</string>

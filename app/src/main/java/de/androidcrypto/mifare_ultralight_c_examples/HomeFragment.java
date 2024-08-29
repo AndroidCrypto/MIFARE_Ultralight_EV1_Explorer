@@ -74,7 +74,7 @@ public class HomeFragment extends Fragment {
                 displayLicensesAlertDialog();
             }
         });
-        String messageTrue = "Although a MIFARE Ultralight C is very similar to an Ultralight EV1 tag, you should NOT use this app with an Ultralight C tag only.";
+        String messageTrue = "Although a MIFARE Ultralight C is very similar to an Ultralight or an Ultralight EV1 tag, you should use this app with an Ultralight C tag only.";
         TextView textViewTrue = getView().findViewById(R.id.textViewTrue);
         textViewTrue.setVisibility(View.VISIBLE);
         textViewTrue.setText(messageTrue);
