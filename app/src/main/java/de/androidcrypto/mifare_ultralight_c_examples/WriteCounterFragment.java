@@ -4,17 +4,14 @@ import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.doAuthenticateUltralightCDefault;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.getCounterValue;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.identifyUltralightFamily;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.increaseCounterValueByOne;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.hexStringToByteArray;
-import static de.androidcrypto.mifare_ultralight_c_examples.Utils.printData;
-
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.MifareUltralight;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -30,8 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -60,7 +55,6 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
     private NfcA nfcA;
     private String outputString = ""; // used for the UI output
     private boolean isTagUltralight = false;
-    private int pagesToRead;
 
     public WriteCounterFragment() {
         // Required empty public constructor
@@ -144,6 +138,7 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
             writeToUiAppend("The tag is not readable with NfcA classes, sorry");
             writeToUiFinal(resultNfcWriting);
             setLoadingLayoutVisibility(false);
+            returnOnNotSuccess();
             return;
         }
 
@@ -151,38 +146,29 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
             nfcA.connect();
 
             if (nfcA.isConnected()) {
-
                 // get card details
-                byte[] atqa = nfcA.getAtqa();
-                int sak = nfcA.getSak();
-                int maxTransceiveLength = nfcA.getMaxTransceiveLength();
                 byte[] tagId = nfcA.getTag().getId();
                 String[] techList = nfcA.getTag().getTechList();
                 StringBuilder sb = new StringBuilder();
                 sb.append("Technical Data of the Tag").append("\n");
-                sb.append("ATQA: ").append(bytesToHexNpe(atqa)).append("\n");
-                sb.append("SAK:  ").append(sak).append("\n");
                 sb.append("Tag ID: ").append(bytesToHexNpe(tagId)).append("\n");
                 sb.append("Tech-List:").append("\n");
                 sb.append("Tag TechList: ").append(Arrays.toString(techList)).append("\n");
-
-                // sanity check on atqa and sak
-                final byte[] atqaUltralight = hexStringToByteArray("4400");
-                final int sakUltralight = 0;
-                if ((Arrays.equals(atqa, atqaUltralight)) && (sak == sakUltralight)) {
-                    sb.append("The Tag seems to be a MIFARE Ultralight tag").append("\n");
+                if (identifyUltralightFamily(nfcA)) {
+                    sb.append("The Tag seems to be a MIFARE Ultralight Family tag").append("\n");
                     isTagUltralight = true;
                 } else {
                     sb.append("The Tag IS NOT a MIFARE Ultralight tag").append("\n");
                     sb.append("** End of Processing **").append("\n");
+                    isTagUltralight = false;
                 }
-                sb.append("maxTransceiveLength: ").append(maxTransceiveLength).append("\n");
-
                 writeToUiAppend(sb.toString());
-                // stop processing if not an Ultralight tag
-                if (!isTagUltralight) return;
 
-                pagesToRead = 48;
+                // stop processing if not an Ultralight Family tag
+                if (!isTagUltralight) {
+                    returnOnNotSuccess();
+                    return;
+                }
                 writeToUiAppend("This is an Ultralight C tag with 48 pages = 192 bytes memory");
 
                 if (rbNoAuth.isChecked()) {
@@ -224,20 +210,37 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
         }
 
         writeToUiFinal(resultNfcWriting);
-
         playDoublePing();
-
         setLoadingLayoutVisibility(false);
-
         doVibrate(getActivity());
+        reconnect(nfcA);
 
     }
 
-    public static int byteArrayToInt2Byte(byte[] b) {
-        if (b == null) return 0;
-        if (b.length != 2) return 0;
-        return b[0] & 0xFF |
-                (b[1] & 0xFF) << 8;
+    private void returnOnNotSuccess() {
+        writeToUiAppend("=== Return on Not Success ===");
+        writeToUiFinal(resultNfcWriting);
+        playDoublePing();
+        setLoadingLayoutVisibility(false);
+        doVibrate(getActivity());
+        mNfcAdapter.disableReaderMode(this.getActivity());
+    }
+
+    private void reconnect(NfcA nfcA) {
+        // this is just an advice - if an error occurs - close the connection and reconnect the tag
+        // https://stackoverflow.com/a/37047375/8166854
+        try {
+            nfcA.close();
+            Log.d(TAG, "Close NfcA");
+        } catch (Exception e) {
+            Log.e(TAG, "Exception on Close NfcA: " + e.getMessage());
+        }
+        try {
+            Log.d(TAG, "Reconnect NfcA");
+            nfcA.connect();
+        } catch (Exception e) {
+            Log.e(TAG, "Exception on Reconnect NfcA: " + e.getMessage());
+        }
     }
 
     /**
@@ -323,16 +326,12 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
             // Work around for some broken Nfc firmware implementations that poll the card too fast
             options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 250);
 
-            // Enable ReaderMode for all types of card and disable platform sounds
+            // Enable ReaderMode for NfcA types of card and disable platform sounds
             // the option NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK is NOT set
-            // to get the data of the tag afer reading
+            // to get the data of the tag after reading
             mNfcAdapter.enableReaderMode(getActivity(),
                     this,
                     NfcAdapter.FLAG_READER_NFC_A |
-                            NfcAdapter.FLAG_READER_NFC_B |
-                            NfcAdapter.FLAG_READER_NFC_F |
-                            NfcAdapter.FLAG_READER_NFC_V |
-                            NfcAdapter.FLAG_READER_NFC_BARCODE |
                             NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS,
                     options);
         }

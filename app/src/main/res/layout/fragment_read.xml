@@ -155,7 +155,7 @@
                 android:padding="10dp"
                 android:text="@string/nfc_result"
                 android:textAlignment="textStart"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="normal"
                 android:typeface="monospace" />
 

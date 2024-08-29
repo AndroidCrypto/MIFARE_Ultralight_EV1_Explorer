@@ -7,6 +7,7 @@ import static de.androidcrypto.mifare_ultralight_c_examples.Utils.intFrom2ByteAr
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.printData;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.reverseByteArray;
 
+import android.nfc.Tag;
 import android.nfc.tech.NfcA;
 import android.util.Log;
 
@@ -39,8 +40,10 @@ import javax.crypto.spec.IvParameterSpec;
 public class MIFARE_Ultralight_C {
     private static final String TAG = "MFULC";
     public static final String version = "1.00";
-    private static final int pagesToRead = 48;
-    // acknoledge bytes
+    private static final byte[] atqaUltralight = hexStringToByteArray("4400");
+    private static final short sakUltralight = 0;
+    public static final int pagesToRead = 48;
+    // acknowledge bytes
     public static final byte ack = 0x0A;
     public static final byte nack_eeprom_write = 0x02;
     public static final byte nack_parity_crc = 0x01;
@@ -56,6 +59,17 @@ public class MIFARE_Ultralight_C {
     public static final byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
     public static final byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
     public static final byte[] default2AuthKey = "BREAKMEIFYOUCAN!".getBytes(StandardCharsets.UTF_8);
+
+    public static boolean identifyUltralightFamily(NfcA nfcA) {
+        // get card details
+        byte[] atqa = nfcA.getAtqa();
+        short sak = nfcA.getSak();
+        if ((Arrays.equals(atqa, atqaUltralight)) && (sak == sakUltralight)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * auth code taken from  https://stackoverflow.com/a/44640515/8166854

@@ -1,15 +1,20 @@
 package de.androidcrypto.mifare_ultralight_c_examples;
 
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.authenticateUltralightC;
-
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.defaultAuthKey;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.getCounterValue;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.identifyUltralightFamily;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.increaseCounterValueByOne;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.readCompleteContent;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.readPageMifareUltralight;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth0UltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth1UltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePageMifareUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
+import static de.androidcrypto.mifare_ultralight_c_examples.Utils.printData;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -34,14 +39,15 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link ReadFragment#newInstance} factory method to
+ * Use the {@link ReadFragment_Old#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback {
+public class ReadFragment_Old extends Fragment implements NfcAdapter.ReaderCallback {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -52,8 +58,9 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private NfcA g;
 
-    public ReadFragment() {
+    public ReadFragment_Old() {
         // Required empty public constructor
     }
 
@@ -66,8 +73,8 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
      * @return A new instance of fragment ReceiveFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ReadFragment newInstance(String param1, String param2) {
-        ReadFragment fragment = new ReadFragment();
+    public static ReadFragment_Old newInstance(String param1, String param2) {
+        ReadFragment_Old fragment = new ReadFragment_Old();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -85,6 +92,10 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
     private NfcAdapter mNfcAdapter;
     private NfcA nfcA;
     private boolean isTagUltralight = false;
+    private boolean[] isPageReadable;
+
+    Context contextSave;
+    private byte[][] pagesComplete;
 
 
     @Override
@@ -94,6 +105,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        contextSave = getActivity().getApplicationContext();
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this.getContext());
     }
 
@@ -147,8 +159,20 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             writeToUiFinal(readResult);
             setLoadingLayoutVisibility(false);
             returnOnNotSuccess();
+        }
+
+        //writePasswordUltralightCTest(null, defaultAuthKey);
+        //writePasswordUltralightCTest(null, customAuthKey);
+/*
+        if (nfcA != null) {
+            try {
+                nfcA.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             return;
         }
+*/
 
         // get card details
         byte[] tagId = nfcA.getTag().getId();
@@ -169,10 +193,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
         writeToUiAppend(sb.toString());
 
         // stop processing if not an Ultralight Family tag
-        if (!isTagUltralight) {
-            returnOnNotSuccess();
-            return;
-        }
+        if (!isTagUltralight) returnOnNotSuccess();
 
         // go through all sectors
         try {
@@ -200,25 +221,97 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             if (!authSuccess) {
                 writeToUiAppend("The authentication was not successful, operation aborted.");
                 returnOnNotSuccess();
-                return;
             }
 
-            // increase the counter value if requested
-            if (rbNoCounterIncrease.isChecked()) {
-                writeToUiAppend("No Counter Increase requested");
-            } else {
-                writeToUiAppend("Counter Increase requested");
-                if (!authSuccess) {
-                    writeToUiAppend("Previous Auth was not successful or not done, skipped");
-                } else {
-                    success = increaseCounterValueByOne(nfcA);
-                    writeToUiAppend("Status of increaseCounterValueByOne command to page 41: " + success);
-                }
-            }
+/*
+                byte[] p01 = "1234".getBytes(StandardCharsets.UTF_8);
+                byte[] p02 = "5678".getBytes(StandardCharsets.UTF_8);
+                byte[] p03 = "9012".getBytes(StandardCharsets.UTF_8);
+                byte[] p04 = "3456".getBytes(StandardCharsets.UTF_8);
+                byte[] p05 = "6543".getBytes(StandardCharsets.UTF_8);
+                byte[] p06 = "2109".getBytes(StandardCharsets.UTF_8);
+                byte[] p07 = "8765".getBytes(StandardCharsets.UTF_8);
+                byte[] p08 = "4321".getBytes(StandardCharsets.UTF_8);
+*/
+/*
+                byte[] p01 = "BREA".getBytes(StandardCharsets.UTF_8);
+                byte[] p02 = "KMEI".getBytes(StandardCharsets.UTF_8);
+                byte[] p03 = "FYOU".getBytes(StandardCharsets.UTF_8);
+                byte[] p04 = "CAN!".getBytes(StandardCharsets.UTF_8);
+                byte[] p05 = "!NAC".getBytes(StandardCharsets.UTF_8);
+                byte[] p06 = "UOYF".getBytes(StandardCharsets.UTF_8);
+                byte[] p07 = "IEMK".getBytes(StandardCharsets.UTF_8);
+                byte[] p08 = "AERB".getBytes(StandardCharsets.UTF_8);
 
-            // get the current counter
-            int counterValue = getCounterValue(nfcA);
-            writeToUiAppend("Current Counter Value: " + counterValue);
+
+ */
+/*
+                p01 = p05.clone();
+                p02 = p06.clone();
+                p03 = p07.clone();
+                p04 = p08.clone();
+  */
+                /*
+                byte[] d01 = combineByteArrays(p01,p02,p03,p04);
+                byte[] d02 = combineByteArrays(p01,p02,p04,p03);
+                byte[] d03 = combineByteArrays(p01,p03,p02,p04);
+                byte[] d04 = combineByteArrays(p01,p03,p04,p02);
+                byte[] d05 = combineByteArrays(p01,p04,p02,p03);
+                byte[] d06 = combineByteArrays(p01,p04,p03,p02);
+                byte[] d07 = combineByteArrays(p02,p01,p03,p04);
+                byte[] d08 = combineByteArrays(p02,p01,p04,p03);
+                byte[] d09 = combineByteArrays(p02,p03,p01,p04);
+                byte[] d10 = combineByteArrays(p02,p03,p04,p01);
+                byte[] d11 = combineByteArrays(p02,p04,p01,p03);
+                byte[] d12 = combineByteArrays(p02,p04,p03,p01);//
+                byte[] d13 = combineByteArrays(p03,p01,p02,p04);
+                byte[] d14 = combineByteArrays(p03,p01,p04,p02);
+                byte[] d15 = combineByteArrays(p03,p02,p01,p04);
+                byte[] d16 = combineByteArrays(p03,p02,p04,p01);
+                byte[] d17 = combineByteArrays(p03,p04,p01,p02);
+                byte[] d18 = combineByteArrays(p03,p04,p02,p01);
+                byte[] d19 = combineByteArrays(p04,p01,p02,p03);
+                byte[] d20 = combineByteArrays(p04,p01,p04,p02);
+                byte[] d21 = combineByteArrays(p04,p02,p01,p03);
+                byte[] d22 = combineByteArrays(p04,p02,p04,p01);
+                byte[] d23 = combineByteArrays(p04,p03,p01,p02);
+                byte[] d24 = combineByteArrays(p04,p03,p02,p01);
+
+                Log.d(TAG, "************ Auth Test Start ****************");
+                Log.d(TAG, "auth d01: " + authenticateUltralightC(nfcA, d01));
+                Log.d(TAG, printData("d01", d01));
+                Log.d(TAG, new String(d01, StandardCharsets.UTF_8));
+
+
+                    Log.d(TAG, "auth d02: " + authenticateUltralightC(nfcA, d02));
+                    Log.d(TAG, "auth d03: " + authenticateUltralightC(nfcA, d03));
+                    Log.d(TAG, "auth d04: " + authenticateUltralightC(nfcA, d04));
+                    Log.d(TAG, "auth d05: " + authenticateUltralightC(nfcA, d05));
+                    Log.d(TAG, "auth d06: " + authenticateUltralightC(nfcA, d06));
+                    Log.d(TAG, "auth d07: " + authenticateUltralightC(nfcA, d07));
+                    Log.d(TAG, "auth d08: " + authenticateUltralightC(nfcA, d08));
+                    Log.d(TAG, "auth d09: " + authenticateUltralightC(nfcA, d09));
+                    Log.d(TAG, "auth d10: " + authenticateUltralightC(nfcA, d10));
+                    Log.d(TAG, "auth d11: " + authenticateUltralightC(nfcA, d11));
+                    Log.d(TAG, "auth d12: " + authenticateUltralightC(nfcA, d12));
+                    Log.d(TAG, "auth d13: " + authenticateUltralightC(nfcA, d13));
+                    Log.d(TAG, "auth d14: " + authenticateUltralightC(nfcA, d14));
+                    Log.d(TAG, "auth d15: " + authenticateUltralightC(nfcA, d15));
+                    Log.d(TAG, "auth d16: " + authenticateUltralightC(nfcA, d16));
+                    Log.d(TAG, "auth d17: " + authenticateUltralightC(nfcA, d17));
+                    Log.d(TAG, "auth d18: " + authenticateUltralightC(nfcA, d18));
+                    Log.d(TAG, "auth d19: " + authenticateUltralightC(nfcA, d19));
+                    Log.d(TAG, "auth d20: " + authenticateUltralightC(nfcA, d20));
+                    Log.d(TAG, "auth d21: " + authenticateUltralightC(nfcA, d21));
+                    Log.d(TAG, "auth d22: " + authenticateUltralightC(nfcA, d22));
+                    Log.d(TAG, "auth d23: " + authenticateUltralightC(nfcA, d23));
+                    Log.d(TAG, "auth d24: " + authenticateUltralightC(nfcA, d24));
+
+
+                    Log.d(TAG, "************ Auth Test Stopp ****************");
+
+                if (isUltralightC) return;
+*/
 
             // read complete memory with colored data
             byte[] memoryContent = readCompleteContent(nfcA);
@@ -272,6 +365,61 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 }
             });
 
+            boolean isUltralightC = true;
+            if (isUltralightC) {
+                // try to write to tag
+                byte[] dataToWrite = "1234".getBytes(StandardCharsets.UTF_8);
+                success = writePageMifareUltralightC(nfcA, 32, dataToWrite, true);
+                writeToUiAppend("Status of write command to page 32: " + success);
+/*
+                    if (isUltralightC) {
+                        success = doAuthenticateUltralightCDefault();
+                        Log.d(TAG, "doAuthenticateUltralightCDefault success: " + success);
+                        writeToUiAppend("doAuthenticateUltralightCDefault success: " + success);
+                        if (!success) returnOnNotSuccess();
+                    }
+*/
+                // write Auth0
+                byte defineAuth0Page = 0x20; // page 32
+                //byte defineAuth0Page = 0x30; // page 48 = unset any Authentication requirement
+                success = writeAuth0UltralightC(nfcA, defineAuth0Page);
+                writeToUiAppend("Status of writeAuth0 command to page 32: " + success);
+
+                // write Auth1
+                boolean defineWriteOnlyRestricted = false;
+                //boolean defineWriteOnlyRestricted = true;
+                success = writeAuth1UltralightC(nfcA, defineWriteOnlyRestricted);
+                writeToUiAppend("Status of writeAuth1 command to WriteRestrictedOnly: " + success);
+
+                // try to write to tag
+                dataToWrite = "7777".getBytes(StandardCharsets.UTF_8);
+                //dataToWrite = "9999".getBytes(StandardCharsets.UTF_8);
+                success = writePageMifareUltralightC(nfcA, 39, dataToWrite, true);
+                writeToUiAppend("Status of write command to page 39: " + success);
+
+                byte[] dataToRead = readPageMifareUltralight(nfcA, 32);
+                writeToUiAppend(printData("page32", dataToRead));
+
+                dataToRead = readPageMifareUltralight(nfcA, 39);
+                writeToUiAppend(printData("page39", dataToRead));
+
+                if (rbNoCounterIncrease.isChecked()) {
+                    writeToUiAppend("No Counter Increase requested");
+                } else {
+                    writeToUiAppend("Counter Increase requested");
+                    if (!authSuccess) {
+                        writeToUiAppend("Previous Auth was not successful or not done, skipped");
+                    } else {
+                        success = increaseCounterValueByOne(nfcA);
+                        writeToUiAppend("Status of increaseCounterValueByOne command to page 41: " + success);
+                    }
+                }
+
+                // get the current counter
+                int counterValue = getCounterValue(nfcA);
+                writeToUiAppend("Current Counter Value: " + counterValue);
+            }
+
             nfcA.close();
         } catch (IOException e) {
             writeToUiAppend("IOException on connection: " + e.getMessage());
@@ -286,6 +434,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
         setLoadingLayoutVisibility(false);
         doVibrate(getActivity());
         reconnect(nfcA);
+        return;
     }
 
     private void returnOnNotSuccess() {
@@ -295,6 +444,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
         setLoadingLayoutVisibility(false);
         doVibrate(getActivity());
         mNfcAdapter.disableReaderMode(this.getActivity());
+        return;
     }
 
     private void reconnect(NfcA nfcA) {
@@ -304,13 +454,11 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             nfcA.close();
             Log.d(TAG, "Close NfcA");
         } catch (Exception e) {
-            Log.e(TAG, "Exception on Close NfcA: " + e.getMessage());
         }
         try {
             Log.d(TAG, "Reconnect NfcA");
             nfcA.connect();
         } catch (Exception e) {
-            Log.e(TAG, "Exception on Reconnect NfcA: " + e.getMessage());
         }
     }
 
