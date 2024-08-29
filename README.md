@@ -1,4 +1,4 @@
-# MIFARE Ultralight C Examples
+# MIFARE Ultralight C Explorer
 
 ## Description
 
@@ -7,7 +7,7 @@ This app reads and writes data to NXP's MIFARE Ultralight C tag. It is tested wi
 **Please do not use a MIFARE Ultralight or Ultralight EV1 tag with this app** - these have a similar command set but are different 
 in Authentication, page locking, counter and other details. Using these tag may brick your tag.
 
-The tutorial to this app is available on medium.com: please be patient...
+The tutorial to this app is available on medium.com: https://medium.com/@androidcrypto/explore-a-mifare-ultralight-c-nfc-tag-android-java-e6408b1030cf
 
 ## Data Sheet
 
