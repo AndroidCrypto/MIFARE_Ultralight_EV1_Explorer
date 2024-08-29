@@ -194,7 +194,7 @@ public class MIFARE_Ultralight_C {
      * @param noPageCheck if true all pages can be written
      * @return
      */
-    public static boolean writePageMifareUltralightC(NfcA nfcA, int page, byte[] data4Byte, boolean noPageCheck) {
+    private static boolean writePageMifareUltralightC(NfcA nfcA, int page, byte[] data4Byte, boolean noPageCheck) {
         if (data4Byte == null) {
             Log.d(TAG, "writePage data is NULL, aborted");
             return false;

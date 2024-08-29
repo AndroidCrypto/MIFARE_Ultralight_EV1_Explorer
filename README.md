@@ -55,6 +55,12 @@ There are 5 icons in the "Bottom Navigation Bar":
 
 ![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_03.png)
 
+## What is not possible with this app ?
+
+I excluded any writing to the Lock Bytes and the One Time Programming (OTP) area. This is due to the fact that 
+these bits and bytes are just settable, If a bit in this bytes is set it remains set - there is no reset, 
+clearing or deleting of the data written to the tag.
+
 ## Material used for this app
 
 **Icons**: https://www.freeiconspng.com/images/nfc-icon
