@@ -29,15 +29,15 @@ import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 
 /**
- * This class holds all methods to work with a MIFARE Ultralight C NFC tag.
+ * This class holds all methods to work with a MIFARE Ultralight EV1 NFC tag.
  * Note: the class is using the NfcA class to communicate with the tag and
  * not the Ultralight class that is not available on all Android devices.
- * Please do not use this class to work with MIFARE Ultralight EV1 tags as
- * this class uses specific and predefined data for Ultralight C tags.
+ * Please do not use this class to work with MIFARE Ultralight C tags as
+ * this class uses specific and predefined data for Ultralight EV1 tags.
  */
 
-public class MIFARE_Ultralight_C {
-    private static final String TAG = "MFULC";
+public class MIFARE_Ultralight_EV1 {
+    private static final String TAG = "MFULEV1";
     public static final String version = "1.00";
     private static final byte[] atqaUltralight = hexStringToByteArray("4400");
     private static final short sakUltralight = 0;
