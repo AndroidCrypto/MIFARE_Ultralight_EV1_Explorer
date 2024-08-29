@@ -6,6 +6,7 @@ import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.identifyUltralightFamily;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth0UltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writeAuth1UltralightC;
+import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePageMifareUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.MIFARE_Ultralight_C.writePasswordUltralightC;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_c_examples.Utils.doVibrate;
@@ -73,6 +74,7 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
     private TextView readResult;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
     private RadioButton rbMemoryWriteProtection, rbMemoryWriteReadProtection;
+    private RadioButton rbMemoryNoClearing, rbMemoryClearing;
     private RadioButton rbChangePasswordNone, rbChangePasswordDefault, rbChangePasswordCustom;
     private AutoCompleteTextView authenticationRequiredPage;
     private View loadingLayout;
@@ -99,6 +101,8 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
         rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
         rbMemoryWriteProtection = getView().findViewById(R.id.rbMemoryWriteProtection);
         rbMemoryWriteReadProtection = getView().findViewById(R.id.rbMemoryWriteReadProtection);
+        rbMemoryNoClearing = getView().findViewById(R.id.rbMemoryNoClearing);
+        rbMemoryClearing = getView().findViewById(R.id.rbMemoryClearing);
         rbChangePasswordNone = getView().findViewById(R.id.rbChangePasswordNone);
         rbChangePasswordDefault = getView().findViewById(R.id.rbChangePasswordDefault);
         rbChangePasswordCustom = getView().findViewById(R.id.rbChangePasswordCustom);
@@ -215,6 +219,21 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                 }
                 success = writeAuth1UltralightC(nfcA, defineWriteOnlyRestricted);
                 writeToUiAppend("Status of writeAuth1 command to WriteRestrictedOnly: " + success);
+
+                // clearing of the free user memory
+                if (rbMemoryNoClearing.isChecked()) {
+                    writeToUiAppend("No Memory Clearing requested");
+                } else {
+                    writeToUiAppend("Memory Clearing requested");
+                    // try to write to all pages in the range 04h .. 27h  (04d .. 39d)
+                    byte[] emptyPage = new byte[4];
+                    success = true; // to run the first write command
+                    for (int i = 4; i < 40; i++) {
+                        if (success) success = writePageMifareUltralightC(nfcA, i, emptyPage);
+                        writeToUiAppend("Writing to page " + i + ": " + success);
+                    }
+                    if (success) writeToUiAppend("Memory Clearing done");
+                }
 
                 // change password - options are no change, change to default or change to custom
                 if (rbChangePasswordNone.isChecked()) {
