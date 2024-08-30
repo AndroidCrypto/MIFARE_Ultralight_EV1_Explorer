@@ -66,30 +66,6 @@
 
             </RadioGroup>
 
-            <RadioGroup
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/rbNoCounterIncrease"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:checked="true"
-                    android:text="No Counter Increase" />
-
-                <RadioButton
-                    android:id="@+id/rbCounterIncrease"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Counter Increase +1" />
-
-            </RadioGroup>
-
             <LinearLayout
                 android:id="@+id/loading_layout"
                 android:layout_width="wrap_content"

@@ -3,9 +3,9 @@ package de.androidcrypto.mifare_ultralight_ev1_explorer;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightC;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.doAuthenticateUltralightCDefault;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.getCounterValue;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterValueByOne;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterByOne;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCounter;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
 import android.content.Intent;
@@ -196,11 +196,11 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
                 if (!authSuccess) {
                     writeToUiAppend("Previous Auth was not successful or not done, skipped");
                 } else {
-                    success = increaseCounterValueByOne(nfcA);
+                    success = increaseCounterByOne(nfcA, 0);
                     writeToUiAppend("Status of increaseCounterValueByOne command to page 41: " + success);
                 }
             }
-            int counter0I = getCounterValue(nfcA);
+            int counter0I = readCounter(nfcA, 0);
             writeToUiAppend("Counter in page 41d: " + counter0I);
             writeCounterToUi(counter0I, 0, 0);
 

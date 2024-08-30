@@ -4,6 +4,7 @@ import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNp
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.combineByteArrays;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.hexStringToByteArray;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.intFrom2ByteArrayInversed;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.intFrom3ByteArrayInversed;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.printData;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.reverseByteArray;
 
@@ -429,22 +430,55 @@ public class MIFARE_Ultralight_EV1 {
         return true;
     }
 
-    public static int getCounterValue(NfcA nfcA) {
-        // the counter is located in the first two bytes of page 29h, representing a 16 bit counter.
-        // The counter starts with 0h and ends with 65535.
-        byte[] pageData = readPageMifareUltralight(nfcA, 41);
-        if (pageData == null) {
-            Log.d(TAG, "getCounterValue returned NULL - the counter page is not readable");
-            return -1;
+    /**
+     * Return the value of a 24-bit counter. The access is possible without any authentication.
+     * @param nfcA
+     * @param counterNumber in range 0..2
+     * @return
+     */
+    public static int readCounter (NfcA nfcA, int counterNumber) {
+        if ((counterNumber < 0) || (counterNumber > 2)) {
+            Log.e(TAG, "The counterNumber is out of range 0..2, aborted");
+            return -3;
         }
-        // Although 2 last 2 bytes are set to 0 I'm using just 2 bytes for conversion
-        return intFrom2ByteArrayInversed(Arrays.copyOf(pageData, 2));
+        byte[] response = null;
+        try {
+            response = nfcA.transceive(new byte[]{
+                    (byte) 0x39,
+                    (byte) (counterNumber & 0x0ff)
+            });
+            if (response.length != 3) {
+                return -1;
+            } else {
+                Log.d(TAG, "The value of counter " + counterNumber + " is: " + printData("response", response));
+                return intFrom3ByteArrayInversed(response);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "IOException when reading a counter: " + e.getMessage());
+            return -2;
+        }
     }
 
-    public static boolean increaseCounterValueByOne(NfcA nfcA) {
-        // the counter is located in the first two bytes of page 29h, representing a 16 bit counter.
-        byte[] data4Byte = hexStringToByteArray("01000000");
-        return writePageMifareUltralightC(nfcA, 41, data4Byte, true);
+    public static boolean increaseCounterByOne(NfcA nfcA, int counterNumber) {
+        if ((counterNumber < 0) || (counterNumber > 2)) {
+            Log.e(TAG, "The counterNumber is out of range 0..2, aborted");
+            return false;
+        }
+        byte[] response = null;
+        try {
+            response = nfcA.transceive(new byte[]{
+                    (byte) 0xA5,
+                    (byte) (counterNumber & 0x0ff),
+                    (byte) 0x01, // LSB order
+                    (byte) 0x00,
+                    (byte) 0x00,
+                    (byte) 0x00, // this byte is ignored
+            });
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "IOException when reading a counter: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -529,6 +563,8 @@ public class MIFARE_Ultralight_EV1 {
         }
         return completeContent;
     }
+
+
 
     // internal methods
 

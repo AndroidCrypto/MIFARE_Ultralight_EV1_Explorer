@@ -5,7 +5,7 @@
 This app reads and writes data to NXP's MIFARE Ultralight EV1 tag. It is tested with a fabric new Ultralight EV1 type.
 
 **Please do not use a MIFARE Ultralight or Ultralight C tag with this app** - these have a similar command set but are different 
-in Authentication, page locking, counter and other details. Using these tag may brick your tag.
+in Authentication, page locking, counter and other details. Using these tags with the app may brick your tag.
 
 The tutorial to this app is available on medium.com: ... please be patient
 
@@ -23,7 +23,7 @@ There are 5 icons in the "Bottom Navigation Bar":
 
 1) Home: gives an overview about the app and shows the license terms of material used for the app.
 2) Read: tries to read the complete content of the tag and display the data in a colored dump.
-3) Write Counter: increases the 16-bit one way counter by "1".
+3) Write Counter: increases the 24-bit one way counter by "1".
 4) Write Data: writes up to 16 characters to 4 subsequent pages of the user memory. Another option is to write a current timestamp to the tag.
 5) Write Configuration: Select the page a memory protection is active. Selecting page 48 disables any memory protection. Select the mode of memory protection: write access only or read and write access. Select if you want to clear the user memory. The last option is to leave or change the current password (change to the Default or Custom key).
 

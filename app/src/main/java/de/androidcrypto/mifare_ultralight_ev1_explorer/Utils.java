@@ -156,6 +156,12 @@ public class Utils {
                 ((bytes[0] & 0xFF) << 0 );
     }
 
+    public static int intFrom3ByteArrayInversed(byte[] bytes) {
+        return  ((bytes[2] & 0xFF) << 16) |
+                ((bytes[1] & 0xFF) << 8 ) |
+                ((bytes[0] & 0xFF) << 0 );
+    }
+
     public static String parseTextrecordPayload(byte[] ndefPayload) {
         int languageCodeLength = Array.getByte(ndefPayload, 0);
         int ndefPayloadLength = ndefPayload.length;

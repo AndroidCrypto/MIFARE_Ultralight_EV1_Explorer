@@ -4,13 +4,13 @@ import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_
 
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultAuthKey;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.getCounterValue;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightEv1Tag;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterValueByOne;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterByOne;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.pagesToRead;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCompleteContent;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCompleteContentFastRead;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCounter;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
 
@@ -82,7 +82,6 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
     private TextView readSpan;
     private TextView readSpanLegend;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
-    private RadioButton rbNoCounterIncrease, rbCounterIncrease;
     private View loadingLayout;
     private String outputString = ""; // used for the UI output
     private NfcAdapter mNfcAdapter;
@@ -109,8 +108,6 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
         rbNoAuth = getView().findViewById(R.id.rbNoAuth);
         rbDefaultAuth = getView().findViewById(R.id.rbDefaultAuth);
         rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
-        rbNoCounterIncrease = getView().findViewById(R.id.rbNoCounterIncrease);
-        rbCounterIncrease = getView().findViewById(R.id.rbCounterIncrease);
         loadingLayout = getView().findViewById(R.id.loading_layout);
     }
 
@@ -234,23 +231,6 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 return;
             }
 
-            // increase the counter value if requested
-            if (rbNoCounterIncrease.isChecked()) {
-                writeToUiAppend("No Counter Increase requested");
-            } else {
-                writeToUiAppend("Counter Increase requested");
-                if (!authSuccess) {
-                    writeToUiAppend("Previous Auth was not successful or not done, skipped");
-                } else {
-                    success = increaseCounterValueByOne(nfcA);
-                    writeToUiAppend("Status of increaseCounterValueByOne command to page 41: " + success);
-                }
-            }
-/*
-            // get the current counter
-            int counterValue = getCounterValue(nfcA);
-            writeToUiAppend("Current Counter Value: " + counterValue);
-*/
             // read complete memory with colored data
             byte[] memoryContent = readCompleteContentFastRead(nfcA);
             String memoryDumpString = HexDumpOwn.prettyPrint(memoryContent);
@@ -322,6 +302,17 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 }
             });
 
+            // Read all 3 counters
+            writeToUiAppend("Counter 0: " + readCounter(nfcA, 0));
+            writeToUiAppend("Counter 1: " + readCounter(nfcA, 1));
+            writeToUiAppend("Counter 2: " + readCounter(nfcA, 2));
+/*
+            // increase counter 0
+            writeToUiAppend("Increase Counter 0 by one: " + increaseCounterByOne(nfcA, 0));
+
+            // read counter 0 again
+            writeToUiAppend("Counter 0: " + readCounter(nfcA, 0));
+*/
             nfcA.close();
         } catch (IOException e) {
             writeToUiAppend("IOException on connection: " + e.getMessage());
