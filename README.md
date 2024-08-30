@@ -13,7 +13,7 @@ The tutorial to this app is available on medium.com: ... please be patient
 
 The Mifare Ultralight EV1 datasheet is a good source for all questions regarding programming this tag:
 
-MIFARE Ultralight EV1: Get the datasheet here MF0ICU2: https://www.nxp.com/docs/en/data-sheet/MF0ICU2.pdf
+MIFARE Ultralight EV1: Get the datasheet here MF0ULX1: https://www.nxp.com/docs/en/data-sheet/MF0ULX1.pdf
 
 The datasheet is available in the docs folder of this repository, but it is always better to get one from the origin source.
 

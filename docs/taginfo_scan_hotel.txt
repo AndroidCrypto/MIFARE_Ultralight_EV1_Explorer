@@ -1,0 +1,100 @@
+** TagInfo Scan (version 5.0.0) 30-Aug.-24 00:01:28 **
+Report Type: -- IC INFO ------------------------------
+
+# IC Manufacturer:
+NXP Semiconductors
+
+# IC Type:
+MIFARE Ultralight EV1 (MF0UL11)
+
+-- NDEF ------------------------------
+
+# No NDEF Data Storage Populated:
+
+-- EXTRA ------------------------------
+
+# Memory Information:
+48 bytes user memory
+* 12 pages, with 4 bytes per page
+
+# IC Information:
+Full product name: MF0UL1101DUx
+
+# Version information:
+Vendor ID: NXP Semiconductors (0x04)
+Type: MIFARE Ultralight (0x03)
+Subtype: 17 pF (0x01)
+Major version: 1 (0x01)
+Minor version: V0 (0x00)
+Storage size: 48 bytes (0x0B)
+Protocol: ISO/IEC 14443-3 (0x03)
+
+
+# Configuration information:
+AFC counter values:
+* Counter #0: 17 (0x000011)
+* Counter #1: 0 (0x000000)
+* Counter #2: 1 (0x000001)
+
+# Originality Check (asymmetric):
+Signature verified with NXP public key
+
+# Originality Check (symmetric):
+Originality check not supported
+
+# TagInfo Version:
+Version :5.0.0
+
+# Device Info:
+Device Model :samsung ( SM-A515F )
+Android OS Version :13
+
+-- FULL SCAN ------------------------------
+
+# Technologies Supported:
+ISO/IEC 14443-3 (Type A) compatible
+ISO/IEC 14443-2 (Type A) compatible
+
+# Android Technology Information:
+Tag description:
+* TAG: Tech [android.nfc.tech.NfcA, android.nfc.tech.MifareUltralight, android.nfc.tech.NdefFormatable]
+* Maximum transceive length: 253 bytes
+* Default maximum transceive time-out: 618 ms
+MIFARE Classic support present in Android
+
+# Detailed Protocol Information:
+ID: 04:7C:D3:6A:6E:10:91
+ATQA: 0x4400
+SAK: 0x00
+
+# Memory Content:
+[00] *  04:7C:D3 23 (UID0-UID2, BCC0)
+[01] *  6A:6E:10:91 (UID3-UID6)
+[02] x  85 48 08 00 (BCC1, INT, LOCK0-LOCK1)
+[03] x  E3:0C:AC:1B (OTP0-OTP3)
+[04] .  32 30 32 33 |2023|
+[05] .  2E 30 34 2E |.04.|
+[06] .  31 37 20 32 |17␠2|
+[07] .  30 3A 30 33 |0:03|
+[08] .  31 32 33 34 |1234|
+[09] .  00 00 00 00 |␀␀␀␀|
+[0A] .  00 00 00 00 |␀␀␀␀|
+[0B] .  00 00 00 00 |␀␀␀␀|
+[0C] .  00 00 00 00 |␀␀␀␀|
+[0D] .  00 00 00 00 |␀␀␀␀|
+[0E] .  00 00 00 00 |␀␀␀␀|
+[0F] .  00 00 00 00 |␀␀␀␀|
+[0F] ?p XX XX XX XX (LOCK2-LOCK4, CHK)
+[10] ?p XX -- -- -- (AUTH0)
+[11] ?p XX XX -- -- (ACCESS, VCTID)
+[12] +P XX XX XX XX (PWD0-PWD3)
+[13] +P XX XX -- -- (PACK0-PACK1)
+
+  *:locked & blocked, x:locked,
+  +:blocked, .:un(b)locked, ?:unknown
+  r:readable (write-protected),
+  p:password protected, -:write-only
+  P:password protected write-only
+
+--------------------------------------
+

@@ -7,6 +7,7 @@ import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.intFrom2Byte
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.printData;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.reverseByteArray;
 
+import android.nfc.NfcAntennaInfo;
 import android.nfc.tech.NfcA;
 import android.util.Log;
 
@@ -41,7 +42,7 @@ public class MIFARE_Ultralight_EV1 {
     public static final String version = "1.00";
     private static final byte[] atqaUltralight = hexStringToByteArray("4400");
     private static final short sakUltralight = 0;
-    public static final int pagesToRead = 48;
+    public static int pagesToRead = 41; // MFOUL21 tag, can be changed to 20 in case of a MF0UL11 tag
     // acknowledge bytes
     public static final byte ack = 0x0A;
     public static final byte nack_eeprom_write = 0x02;
@@ -49,14 +50,8 @@ public class MIFARE_Ultralight_EV1 {
     public static final byte nack_other = 0x00;
     // Remark: Any 4-bit response different from Ah shall be interpreted as NAK
 
-    public static final byte[] mifareULCDefaultKey = {(byte) 0x49, (byte) 0x45,
-            (byte) 0x4D, (byte) 0x4B, (byte) 0x41, (byte) 0x45,
-            (byte) 0x52, (byte) 0x42, (byte) 0x21, (byte) 0x4E,
-            (byte) 0x41, (byte) 0x43, (byte) 0x55, (byte) 0x4F,
-            (byte) 0x59, (byte) 0x46}; // IEMKAERB!NACUOYF
-
-    public static final byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
-    public static final byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
+    public static final byte[] defaultAuthKey = hexStringToByteArray("00000000");
+    public static final byte[] customAuthKey = "1234".getBytes(StandardCharsets.UTF_8);
 
     public static boolean identifyUltralightFamily(NfcA nfcA) {
         // get card details
@@ -66,6 +61,53 @@ public class MIFARE_Ultralight_EV1 {
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * The Ultralight EV1 tag has a command to read out the specification of the tag.
+     * See datasheet for more details: page 20 ff
+     * @param nfcA
+     * @return Value is an 8 bytes long array, the three most important bytes are:
+     * Product Type:          byte 2, 0x03h = MIFARE Ultralight
+     * Major Product Version: byte 4, 0x01h = EV1
+     * Storage size:          byte 6, 0x0Bh = MF0UL11 = 48 bytes
+     *                                0x0Eh = MF0UL21 = 128 bytes
+     */
+    public static byte[] getVersion(NfcA nfcA) {
+        byte[] response = null;
+        try {
+            response = nfcA.transceive(new byte[]{
+                    (byte) 0x60  // Get version command
+            });
+            return response;
+        } catch (IOException e) {
+            Log.e(TAG, "Get Version command failed with IOException: " + e.getMessage());
+        }
+        return null;
+    }
+
+
+    public static int identifyUltralightEv1Tag (NfcA nfcA) {
+        byte[] response = getVersion(nfcA);
+        if (response == null) {
+            Log.d(TAG, "Get Version responds with Null");
+            return 0;
+        }
+        // check for bytes 2 (product type), 4 (major product version) and byte 6 (storage size)
+        if ((response[2] != 0x03) || (response[4] != 0x01)) {
+            Log.d(TAG, "Product Type or Major Product Version is not indicating an Ultralight EV1 tag");
+            return 0;
+        }
+        if (response[6] == 0x0B) {
+            pagesToRead = 20;
+            return 48;
+        } else if (response[6] == 0x0E) {
+            pagesToRead = 41;
+            return 128;
+        } else {
+            pagesToRead = 0;
+            return 0; // unknown storage size
         }
     }
 
@@ -146,7 +188,7 @@ public class MIFARE_Ultralight_EV1 {
      *
      * @param nfcA
      * @param page
-     * @return
+     * @return The command returns 16 bytes (4 pages) with one command
      */
     public static byte[] readPageMifareUltralight(NfcA nfcA, int page) {
         byte[] response = null;
@@ -155,7 +197,11 @@ public class MIFARE_Ultralight_EV1 {
                     (byte) 0x30,           // READ a page is 4 bytes long
                     (byte) (page & 0x0ff)  // page address
             });
-            return response;
+            if (response.length < 16) {
+                return null;
+            } else {
+                return response;
+            }
         } catch (IOException e) {
             Log.d(TAG, "on page " + page + " readPage failed with IOException: " + e.getMessage());
         }
@@ -172,6 +218,31 @@ public class MIFARE_Ultralight_EV1 {
         }
 
          */
+        return null;
+    }
+
+    /**
+     * This allows to read the complete memory = all pages of the tag. If a page is not readable the
+     * method returns NULL.
+     * Note: some pages are not readable by design (e.g. password).
+     *
+     * @param nfcA
+     * @param startPage
+     * @param endPage
+     * @return The command returns all bytes from all pages with one command
+     */
+    public static byte[] fastReadPageMifareUltralight(NfcA nfcA, int startPage, int endPage) {
+        byte[] response = null;
+        try {
+            response = nfcA.transceive(new byte[]{
+                    (byte) 0x3A,           // FAST READ command
+                    (byte) (startPage & 0x0ff),  // start page address
+                    (byte) (endPage & 0x0ff)  // end page address
+            });
+            return response;
+        } catch (IOException e) {
+            Log.d(TAG, "FastReadPage failed with IOException: " + e.getMessage());
+        }
         return null;
     }
 
@@ -358,67 +429,6 @@ public class MIFARE_Ultralight_EV1 {
         return true;
     }
 
-    public static boolean writePasswordUltralightCTest(NfcA nfcA, byte[] password16bytes) {
-        if (password16bytes == null) {
-            Log.d(TAG, "password16bytes is NULL, aborted");
-            return false;
-        }
-        if (password16bytes.length != 16) {
-            Log.d(TAG, "password16bytes is not 16 bytes long, aborted");
-            return false;
-        }
-        // change the direction and position of elements
-        // e.g. byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
-        // step 1: inverse the bytes
-        byte[] passwordInversed = reverseByteArray(password16bytes);
-        // step 2: reorg of the data
-        byte[] passwordFinal = new byte[passwordInversed.length];
-        System.arraycopy(passwordInversed, 8, passwordFinal, 0, 8);
-        System.arraycopy(passwordInversed, 0, passwordFinal, 8, 8);
-        // step 3: write the data in 4 byte chunks
-        boolean success;
-        //success = false;
-        byte[] dataPage44 = Arrays.copyOfRange(passwordFinal, 0, 4);
-        byte[] dataPage45 = Arrays.copyOfRange(passwordFinal, 4, 8);
-        byte[] dataPage46 = Arrays.copyOfRange(passwordFinal, 8, 12);
-        byte[] dataPage47 = Arrays.copyOfRange(passwordFinal, 12, 16);
-        Log.e(TAG, printData("passwordInput", passwordFinal));
-        Log.e(TAG, printData("passwordFinal", passwordFinal));
-        Log.e(TAG, printData("dataPage44", dataPage44));
-        Log.e(TAG, printData("dataPage45", dataPage45));
-        Log.e(TAG, printData("dataPage46", dataPage46));
-        Log.e(TAG, printData("dataPage47", dataPage47));
-
-        if (nfcA == null) return false;
-
-        success = writePageMifareUltralightC(nfcA, 44, dataPage44, true);
-        if (!success) {
-            Log.e(TAG, "Error writing password step 1 page 44");
-            return false;
-        }
-        success = writePageMifareUltralightC(nfcA, 45, dataPage45, true);
-        if (!success) {
-            Log.e(TAG, "Error writing password step 2 page 45");
-            return false;
-        }
-        success = writePageMifareUltralightC(nfcA, 46, dataPage46, true);
-        if (!success) {
-            Log.e(TAG, "Error writing password step 3 page 46");
-            return false;
-        }
-        success = writePageMifareUltralightC(nfcA, 47, dataPage47, true);
-        if (!success) {
-            Log.e(TAG, "Error writing password step 4 page 47");
-            return false;
-        }
-        Log.e(TAG, "passwordOriginal: " + new String(password16bytes));
-        Log.e(TAG, printData("passwordInversed", passwordInversed));
-        Log.e(TAG, "passwordInversed: " + new String(passwordInversed));
-        Log.e(TAG, "passwordInvFinal: " + "IEMKAERB!NACUOYF");
-        Log.e(TAG, "passwordFinal   : " + new String(passwordFinal));
-        return true;
-    }
-
     public static int getCounterValue(NfcA nfcA) {
         // the counter is located in the first two bytes of page 29h, representing a 16 bit counter.
         // The counter starts with 0h and ends with 65535.
@@ -465,16 +475,59 @@ public class MIFARE_Ultralight_EV1 {
     /**
      * Reads the complete content of the tag and returns an array of pages
      * Pages that are not readable (e.g. read protected or by design) are NULL.
-     *
+     * There are 2 memory sizes on market:
+     * MF0UL11 variant: 20 pages in total, user memory: 12 pages, readable 18 pages (0..17d)
+     * MF0UL21 variant: 41 pages in total, user memory: 32 pages, readable 39 pages (0..38d)
+     * The underlying Read Command returns 4 pages = 16 bytes in one command, but when using
+     * the  Fast Read Command we can read the complete memory of the tag in one call.
+     * Important: your Android device needs a buffer that has a minimum of 158 bytes capacity
+     * (see maxTransceiveLength)
      * @param nfcA
      * @return
      */
-    public static byte[][] readCompleteContentPages(NfcA nfcA) {
-        byte[][] pagesComplete = new byte[pagesToRead][]; // clear all data
-        for (int i = 0; i < (pagesToRead - 4); i++) { // the last 4 pages are not readable
-            pagesComplete[i] = readPageMifareUltralight(nfcA, i);
+    public static byte[] readCompleteContentFastRead(NfcA nfcA) {
+        System.out.println("pagesToRead: " + pagesToRead);
+        byte[] readableContent = fastReadPageMifareUltralight(nfcA, 0, pagesToRead - 3);
+        byte[] completeContent;
+        if (pagesToRead == 20) {
+            completeContent = new byte[pagesToRead *4];
+        } else {
+            completeContent = new byte[(pagesToRead + 1) *4]; // as the tag has 41 pages I'm adding a "blind" page
         }
-        return pagesComplete;
+        // in case the tag is complete or partial read restricted the fastReadCommand returns a NAK
+        // the we have to read the pages one by one to get the content that is readable
+        if ((readableContent == null) || (readableContent.length < 10)) {
+            Log.d(TAG, "The FastRead command returned a NAK, probably because the tag is read-only in parts. Now reading page wise");
+            // read page wise
+            byte[] pageContent = new byte[0];
+            if (pagesToRead == 20) {
+                // MF0UL11 variant
+                for (int i = 0; i < pagesToRead; i++) {
+                    if (pageContent != null) {
+                        // skip further reading as we read a content that is read only and we did not run an authentication
+                        pageContent = readPageMifareUltralight(nfcA, i);
+                        Log.d(TAG, "content of page: " + i + ": " + printData("cont", pageContent));
+                        if (pageContent != null) System.arraycopy(pageContent, 0, completeContent, (i * 4), 4); // we are taking 1 page only to avoid roll-over effects
+                    }
+                }
+            } else if (pagesToRead == 41) {
+                // MF0UL21 variant
+                for (int i = 0; i < pagesToRead; i++) {
+                    if (pageContent != null) {
+                        // skip further reading as we read a content that is read only and we did not run an authentication
+                        pageContent = readPageMifareUltralight(nfcA, i);
+                        if (pageContent != null) System.arraycopy(pageContent, 0, completeContent, 0, 4); // we are taking 1 page only to avoid roll-over effects
+                    }
+                }
+            } else {
+                Log.d(TAG, "Unknown pagesToRead, aborted");
+                return null;
+            }
+        } else {
+            // we could read the complete memory with FastRead
+            System.arraycopy(readableContent, 0, completeContent, 0, readableContent.length);
+        }
+        return completeContent;
     }
 
     // internal methods

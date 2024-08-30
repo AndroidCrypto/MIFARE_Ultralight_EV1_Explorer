@@ -5,9 +5,12 @@ import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customAuthKey;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultAuthKey;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.getCounterValue;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightEv1Tag;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightFamily;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterValueByOne;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.pagesToRead;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCompleteContent;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCompleteContentFastRead;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
 
@@ -85,6 +88,7 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
     private NfcAdapter mNfcAdapter;
     private NfcA nfcA;
     private boolean isTagUltralight = false;
+    private int storageSize = 0;
 
 
     @Override
@@ -152,10 +156,12 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
 
         // get card details
         byte[] tagId = nfcA.getTag().getId();
+        int maxTransceiveLength = nfcA.getMaxTransceiveLength();
         String[] techList = nfcA.getTag().getTechList();
         StringBuilder sb = new StringBuilder();
         sb.append("Technical Data of the Tag").append("\n");
         sb.append("Tag ID: ").append(bytesToHexNpe(tagId)).append("\n");
+        sb.append("maxTransceiveLength: ").append(maxTransceiveLength).append(" bytes").append("\n");
         sb.append("Tech-List:").append("\n");
         sb.append("Tag TechList: ").append(Arrays.toString(techList)).append("\n");
         if (identifyUltralightFamily(nfcA)) {
@@ -174,10 +180,35 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             return;
         }
 
-        // go through all sectors
+        // todo check that maxTransceiveLength is >= 158 bytes
+
         try {
             nfcA.connect();
-            writeToUiAppend("This is an Ultralight C tag with 48 pages = 192 bytes memory");
+            // get the version
+            storageSize = identifyUltralightEv1Tag(nfcA);
+            sb = new StringBuilder();
+            if (storageSize == 0) {
+                sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
+                sb.append("** End of Processing **").append("\n");
+                isTagUltralight = false;
+            } else if (storageSize == 48) {
+                sb.append("The Tag is a MIFARE Ultralight EV1 tag with 48 bytes user memory size").append("\n");
+                pagesToRead = 20;
+                isTagUltralight = true;
+            } else if (storageSize == 128) {
+                sb.append("The Tag is a MIFARE Ultralight EV1 tag with 128 bytes user memory size").append("\n");
+                pagesToRead = 41;
+                isTagUltralight = true;
+            } else {
+                sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
+                sb.append("** End of Processing **").append("\n");
+                isTagUltralight = false;
+            }
+            writeToUiAppend(sb.toString());
+            if (!isTagUltralight) {
+                returnOnNotSuccess();
+                return;
+            }
 
             if (rbNoAuth.isChecked()) {
                 writeToUiAppend("No Authentication requested");
@@ -215,35 +246,56 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                     writeToUiAppend("Status of increaseCounterValueByOne command to page 41: " + success);
                 }
             }
-
+/*
             // get the current counter
             int counterValue = getCounterValue(nfcA);
             writeToUiAppend("Current Counter Value: " + counterValue);
-
+*/
             // read complete memory with colored data
-            byte[] memoryContent = readCompleteContent(nfcA);
+            byte[] memoryContent = readCompleteContentFastRead(nfcA);
             String memoryDumpString = HexDumpOwn.prettyPrint(memoryContent);
 
             SpannableString spanString = new SpannableString(memoryDumpString);
-            // UID = RED
-            spanString.setSpan(new BackgroundColorSpan(Color.RED), 10, 18, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            spanString.setSpan(new BackgroundColorSpan(Color.RED), 22, 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            // Lock Bytes = CYAN
-            spanString.setSpan(new BackgroundColorSpan(Color.CYAN), 50, 55, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            spanString.setSpan(new BackgroundColorSpan(Color.CYAN), (20 * 34) + 10, (20 * 34) + 15, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            // OTP = YELLOW
-            spanString.setSpan(new BackgroundColorSpan(Color.YELLOW), (1 * 34) + 22, (1 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            // User Memory = GREEN
-            for (int i = 0; i < 18; i++) {
-                spanString.setSpan(new BackgroundColorSpan(Color.GREEN), ((i + 2) * 34) + 10, ((i + 2) * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            // The following lines depend on the Tag Type = storage size
+            // Tag Type MFOUL21, 41 pages = 164 bytes memory
+            if (pagesToRead == 41) {
+                // UID = RED
+                spanString.setSpan(new BackgroundColorSpan(Color.RED), 10, 18, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spanString.setSpan(new BackgroundColorSpan(Color.RED), 22, 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // Lock Bytes = CYAN
+                spanString.setSpan(new BackgroundColorSpan(Color.CYAN), 50, 55, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spanString.setSpan(new BackgroundColorSpan(Color.CYAN), (18 * 34) + 10, (18 * 34) + 18, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // OTP = YELLOW
+                spanString.setSpan(new BackgroundColorSpan(Color.YELLOW), (1 * 34) + 22, (1 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // User Memory = GREEN
+                for (int i = 0; i < 16; i++) {
+                    spanString.setSpan(new BackgroundColorSpan(Color.GREEN), ((i + 2) * 34) + 10, ((i + 2) * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                }
+                // Authentication Configuration
+                spanString.setSpan(new BackgroundColorSpan(Color.LTGRAY), (18 * 34) + 31, (18 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spanString.setSpan(new BackgroundColorSpan(Color.LTGRAY), (19 * 34) + 10, (19 * 34) + 12, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // Authentication Keys
+                spanString.setSpan(new BackgroundColorSpan(Color.GRAY), (19 * 34) + 22, (19 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spanString.setSpan(new BackgroundColorSpan(Color.GRAY), (20 * 34) + 10, (20 * 34) + 21, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            } else if (pagesToRead == 20) {
+                // UID = RED
+                spanString.setSpan(new BackgroundColorSpan(Color.RED), 10, 18, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                spanString.setSpan(new BackgroundColorSpan(Color.RED), 22, 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // Lock Bytes = CYAN
+                spanString.setSpan(new BackgroundColorSpan(Color.CYAN), 50, 55, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // OTP = YELLOW
+                spanString.setSpan(new BackgroundColorSpan(Color.YELLOW), (1 * 34) + 22, (1 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // User Memory = GREEN
+                for (int i = 0; i < 6; i++) {
+                    spanString.setSpan(new BackgroundColorSpan(Color.GREEN), ((i + 2) * 34) + 10, ((i + 2) * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                }
+                // Authentication Configuration
+                spanString.setSpan(new BackgroundColorSpan(Color.LTGRAY), (8 * 34) + 19, (8 * 34) + 24, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                // Authentication Key
+                spanString.setSpan(new BackgroundColorSpan(Color.GRAY), (9 * 34) + 10, (9 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            } else {
+                // do nothing, unknown tag type
             }
-            // Counter = Magenta
-            spanString.setSpan(new BackgroundColorSpan(Color.MAGENTA), (20 * 34) + 22, (20 * 34) + 27, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            // Authentication Configuration
-            spanString.setSpan(new BackgroundColorSpan(Color.LTGRAY), (21 * 34) + 10, (21 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            // Authentication Keys
-            spanString.setSpan(new BackgroundColorSpan(Color.GRAY), (22 * 34) + 10, (22 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            spanString.setSpan(new BackgroundColorSpan(Color.GRAY), (23 * 34) + 10, (23 * 34) + 33, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
             StringBuilder sbL = new StringBuilder();
             sbL.append("Colored Data Legend").append("\n");
@@ -251,7 +303,6 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             sbL.append("Lock Bytes").append("\n");
             sbL.append("One Time Programming Area").append("\n");
             sbL.append("User Memory Area").append("\n");
-            sbL.append("16-Bit Counter").append("\n");
             sbL.append("Authentication Configuration").append("\n");
             sbL.append("Authentication Keys").append("\n");
 
@@ -260,9 +311,8 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             spanLegendString.setSpan(new BackgroundColorSpan(Color.CYAN), 28, 38, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             spanLegendString.setSpan(new BackgroundColorSpan(Color.YELLOW), 39, 64, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
             spanLegendString.setSpan(new BackgroundColorSpan(Color.GREEN), 65, 81, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            spanLegendString.setSpan(new BackgroundColorSpan(Color.MAGENTA), 82, 96, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            spanLegendString.setSpan(new BackgroundColorSpan(Color.LTGRAY), 97, 125, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            spanLegendString.setSpan(new BackgroundColorSpan(Color.GRAY), 126, 145, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            spanLegendString.setSpan(new BackgroundColorSpan(Color.LTGRAY), 82, 111, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            spanLegendString.setSpan(new BackgroundColorSpan(Color.GRAY), 111, 131, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
 
             getActivity().runOnUiThread(new Runnable() {
                 @Override
