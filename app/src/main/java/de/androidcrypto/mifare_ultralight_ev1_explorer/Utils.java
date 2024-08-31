@@ -58,6 +58,11 @@ public class Utils {
         }
     }
 
+    public static String byteToHex(Byte input) {
+        return String.format("%02X", input);
+        //return String.format("0x%02X", input);
+    }
+
     public static String bytesToHexNpe(byte[] bytes) {
         if (bytes == null) return "";
         StringBuffer result = new StringBuffer();

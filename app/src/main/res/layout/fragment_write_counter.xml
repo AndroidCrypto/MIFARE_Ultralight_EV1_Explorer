@@ -115,7 +115,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:text="increase counter by 1" />
+                android:text="increase counter 0 by 1" />
+
+            <RadioButton
+                android:id="@+id/rbIncreaseCounter1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:text="increase counter 1 by 1" />
+
+            <RadioButton
+                android:id="@+id/rbIncreaseCounter2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:text="increase counter 2 by 1" />
 
         </RadioGroup>
 
@@ -136,7 +150,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
-            android:hint="Counter 0"
+            android:hint="Counter 0 / 1 / 2"
             app:boxCornerRadiusBottomEnd="5dp"
             app:boxCornerRadiusBottomStart="5dp"
             app:boxCornerRadiusTopEnd="5dp"

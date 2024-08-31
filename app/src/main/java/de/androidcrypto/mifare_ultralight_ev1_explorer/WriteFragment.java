@@ -1,10 +1,14 @@
 package de.androidcrypto.mifare_ultralight_ev1_explorer;
 
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightC;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customAuthKey;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultAuthKey;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPassword;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPassword;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightEv1Tag;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writePageMifareUltralightC;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.pagesToRead;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writePageMifareUltralightEv1;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.getTimestampShort;
@@ -68,6 +72,7 @@ public class WriteFragment extends Fragment implements NfcAdapter.ReaderCallback
     private NfcAdapter mNfcAdapter;
     private NfcA nfcA;
     private boolean isTagUltralight = false;
+    private int storageSize = 0;
     private int pageToWrite;
     private String outputString = ""; // used for the UI output
 
@@ -200,12 +205,14 @@ public class WriteFragment extends Fragment implements NfcAdapter.ReaderCallback
             return;
         }
 
-        // get card details
+        //get card details
         byte[] tagId = nfcA.getTag().getId();
+        int maxTransceiveLength = nfcA.getMaxTransceiveLength();
         String[] techList = nfcA.getTag().getTechList();
         StringBuilder sb = new StringBuilder();
         sb.append("Technical Data of the Tag").append("\n");
         sb.append("Tag ID: ").append(bytesToHexNpe(tagId)).append("\n");
+        sb.append("maxTransceiveLength: ").append(maxTransceiveLength).append(" bytes").append("\n");
         sb.append("Tech-List:").append("\n");
         sb.append("Tag TechList: ").append(Arrays.toString(techList)).append("\n");
         if (identifyUltralightFamily(nfcA)) {
@@ -224,68 +231,104 @@ public class WriteFragment extends Fragment implements NfcAdapter.ReaderCallback
             return;
         }
 
-        // you should have checked that this device is capable of working with Mifare Ultralight tags, otherwise you receive an exception
-
-        String sendData = dataToSend.getText().toString();
-        if (addTimestampToData.isChecked()) sendData = getTimestampShort() + " ";
-        if (TextUtils.isEmpty(sendData)) {
-            writeToUiAppend("Please enter some data to write on tag. Aborted");
-            writeToUiFinal(resultNfcWriting);
-            return;
-        }
-        if (sendData.length() > 16) sendData = sendData.substring(0, 16);
-
         try {
             nfcA.connect();
-            writeToUiAppend("This is an Ultralight C tag with 48 pages = 192 bytes memory");
 
-            if (rbNoAuth.isChecked()) {
-                writeToUiAppend("No Authentication requested");
-                authSuccess = true;
-            } else if (rbDefaultAuth.isChecked()) {
-                writeToUiAppend("Authentication with Default Key requested");
-                //authSuccess = doAuthenticateUltralightCDefault();
-                //byte[] defaultKey = "BREAKMEIFYOUCAN!".getBytes(StandardCharsets.UTF_8);
-                //authSuccess = authenticateUltralightC(nfcA, defaultKey);
-                authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
-                writeToUiAppend("authenticateUltralightC with defaultAuthKey success: " + authSuccess);
-            } else {
-                writeToUiAppend("Authentication with Custom Key requested");
-                authSuccess = authenticateUltralightC(nfcA, customAuthKey);
-                //authSuccess = doAuthenticateUltralightCCustom();
-                //authSuccess = authenticateUltralightC(nfcA, customAuthKey);
-                writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
+            if (nfcA.isConnected()) {
+                // get the version
+                storageSize = identifyUltralightEv1Tag(nfcA);
+                sb = new StringBuilder();
+                if (storageSize == 0) {
+                    sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
+                    sb.append("** End of Processing **").append("\n");
+                    isTagUltralight = false;
+                } else if (storageSize == 48) {
+                    sb.append("The Tag is a MIFARE Ultralight EV1 tag with 48 bytes user memory size").append("\n");
+                    pagesToRead = 20;
+                    isTagUltralight = true;
+                } else if (storageSize == 128) {
+                    sb.append("The Tag is a MIFARE Ultralight EV1 tag with 128 bytes user memory size").append("\n");
+                    pagesToRead = 41;
+                    isTagUltralight = true;
+                } else {
+                    sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
+                    sb.append("** End of Processing **").append("\n");
+                    isTagUltralight = false;
+                }
+                writeToUiAppend(sb.toString());
+                if (!isTagUltralight) {
+                    returnOnNotSuccess();
+                    return;
+                }
+
+                // you should have checked that this device is capable of working with Mifare Ultralight tags, otherwise you receive an exception
+
+                String sendData = dataToSend.getText().toString();
+                if (addTimestampToData.isChecked()) sendData = getTimestampShort() + " ";
+                if (TextUtils.isEmpty(sendData)) {
+                    writeToUiAppend("Please enter some data to write on tag. Aborted");
+                    writeToUiFinal(resultNfcWriting);
+                    return;
+                }
+                if (sendData.length() > 16) sendData = sendData.substring(0, 16);
+
+                if (rbNoAuth.isChecked()) {
+                    writeToUiAppend("No Authentication requested");
+                    authSuccess = true;
+                } else if (rbDefaultAuth.isChecked()) {
+                    writeToUiAppend("Authentication with Default Password requested");
+                    // authenticate with default password and pack
+                    int authResult = authenticateUltralightEv1(nfcA, defaultPassword, defaultPack);
+                    if (authResult == 1) {
+                        writeToUiAppend("authentication with Default Password and Pack: SUCCESS");
+                        authSuccess = true;
+                    } else {
+                        writeToUiAppend("authentication with Default Password and Pack: FAILURE " + authResult);
+                        authSuccess = false;
+                    }
+                } else {
+                    writeToUiAppend("Authentication with Custom Password requested");
+                    // authenticate with custom password and pack
+                    int authResult = authenticateUltralightEv1(nfcA, customPassword, customPack);
+                    if (authResult == 1) {
+                        writeToUiAppend("authentication with Custom Password and Pack: SUCCESS");
+                        authSuccess = true;
+                    } else {
+                        writeToUiAppend("authentication with Custom Password and Pack: FAILURE " + authResult);
+                        authSuccess = false;
+                    }
+                }
+
+                if (!authSuccess) {
+                    writeToUiAppend("The authentication was not successful, operation aborted.");
+                    returnOnNotSuccess();
+                    return;
+                }
+
+                // get page to write
+                String choiceString = autoCompleteTextView.getText().toString();
+                pageToWrite = Integer.parseInt(choiceString);
+
+                byte[] dtw = new byte[16];
+                System.arraycopy(sendData.getBytes(StandardCharsets.UTF_8), 0, dtw, 0, sendData.getBytes(StandardCharsets.UTF_8).length); // this is an array filled up with 0x00
+                writeToUiAppend(printData("data to write", dtw));
+                // split dtw (16 bytes long) into 4 byte arrays for page 1 to 4
+                byte[] page1 = Arrays.copyOfRange(dtw, 0, 4);
+                byte[] page2 = Arrays.copyOfRange(dtw, 4, 8);
+                byte[] page3 = Arrays.copyOfRange(dtw, 8, 12);
+                byte[] page4 = Arrays.copyOfRange(dtw, 12, 16);
+
+                // write to tag
+                success = writePageMifareUltralightEv1(nfcA, pageToWrite, page1);
+                writeToUiAppend("Tried to write data to tag on page " + pageToWrite + ", success ? : " + success);
+                success = writePageMifareUltralightEv1(nfcA, pageToWrite + 1, page2);
+                writeToUiAppend("Tried to write data to tag on page " + (pageToWrite + 1) + ", success ? : " + success);
+                success = writePageMifareUltralightEv1(nfcA, pageToWrite + 2, page3);
+                writeToUiAppend("Tried to write data to tag on page " + (pageToWrite + 2) + ", success ? : " + success);
+                success = writePageMifareUltralightEv1(nfcA, pageToWrite + 3, page4);
+                writeToUiAppend("Tried to write data to tag on page " + (pageToWrite + 3) + ", success ? : " + success);
+                nfcA.close();
             }
-
-            if (!authSuccess) {
-                writeToUiAppend("The authentication was not successful, operation aborted.");
-                returnOnNotSuccess();
-                return;
-            }
-
-            // get page to write
-            String choiceString = autoCompleteTextView.getText().toString();
-            pageToWrite = Integer.parseInt(choiceString);
-
-            byte[] dtw = new byte[16];
-            System.arraycopy(sendData.getBytes(StandardCharsets.UTF_8), 0, dtw, 0, sendData.getBytes(StandardCharsets.UTF_8).length); // this is an array filled up with 0x00
-            writeToUiAppend(printData("data to write", dtw));
-            // split dtw (16 bytes long) into 4 byte arrays for page 1 to 4
-            byte[] page1 = Arrays.copyOfRange(dtw, 0, 4);
-            byte[] page2 = Arrays.copyOfRange(dtw, 4, 8);
-            byte[] page3 = Arrays.copyOfRange(dtw, 8, 12);
-            byte[] page4 = Arrays.copyOfRange(dtw, 12, 16);
-
-            // write to tag
-            success = writePageMifareUltralightC(nfcA, pageToWrite, page1);
-            writeToUiAppend("Tried to write data to tag on page " + pageToWrite + ", success ? : " + success);
-            success = writePageMifareUltralightC(nfcA, pageToWrite + 1, page2);
-            writeToUiAppend("Tried to write data to tag on page " + (pageToWrite + 1) + ", success ? : " + success);
-            success = writePageMifareUltralightC(nfcA, pageToWrite + 2, page3);
-            writeToUiAppend("Tried to write data to tag on page " + (pageToWrite + 2) + ", success ? : " + success);
-            success = writePageMifareUltralightC(nfcA, pageToWrite + 3, page4);
-            writeToUiAppend("Tried to write data to tag on page " + (pageToWrite + 3) + ", success ? : " + success);
-            nfcA.close();
         } catch (IOException e) {
             writeToUiAppend("IOException on connection: " + e.getMessage());
             e.printStackTrace();

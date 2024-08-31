@@ -1,13 +1,17 @@
 package de.androidcrypto.mifare_ultralight_ev1_explorer;
 
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightC;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customAuthKey;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.doAuthenticateUltralightCDefault;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPassword;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPassword;import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightEv1Tag;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterByOne;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCounter;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterByOneEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.pagesToRead;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCounterEv1;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
+
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.nfc.NfcAdapter;
@@ -49,12 +53,13 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
     private com.google.android.material.textfield.TextInputLayout counter0Layout;
     private com.google.android.material.textfield.TextInputEditText incrementCounter, counter0, resultNfcWriting;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
-    private RadioButton incrementNoCounter, incrementCounter0;
+    private RadioButton incrementNoCounter, incrementCounter0, incrementCounter1, incrementCounter2;
     private View loadingLayout;
     private NfcAdapter mNfcAdapter;
     private NfcA nfcA;
     private String outputString = ""; // used for the UI output
     private boolean isTagUltralight = false;
+    private int storageSize = 0;
 
     public WriteCounterFragment() {
         // Required empty public constructor
@@ -103,6 +108,8 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
         rbCustomAuth = getView().findViewById(R.id.rbCustomAuth);
         incrementNoCounter = getView().findViewById(R.id.rbCounterNoIncrease);
         incrementCounter0 = getView().findViewById(R.id.rbIncreaseCounter0);
+        incrementCounter1 = getView().findViewById(R.id.rbIncreaseCounter1);
+        incrementCounter2 = getView().findViewById(R.id.rbIncreaseCounter2);
         resultNfcWriting = getView().findViewById(R.id.etReadResult);
         loadingLayout = getView().findViewById(R.id.loading_layout);
         mNfcAdapter = NfcAdapter.getDefaultAdapter(getView().getContext());
@@ -142,77 +149,144 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
             return;
         }
 
+        //get card details
+        byte[] tagId = nfcA.getTag().getId();
+        int maxTransceiveLength = nfcA.getMaxTransceiveLength();
+        String[] techList = nfcA.getTag().getTechList();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Technical Data of the Tag").append("\n");
+        sb.append("Tag ID: ").append(bytesToHexNpe(tagId)).append("\n");
+        sb.append("maxTransceiveLength: ").append(maxTransceiveLength).append(" bytes").append("\n");
+        sb.append("Tech-List:").append("\n");
+        sb.append("Tag TechList: ").append(Arrays.toString(techList)).append("\n");
+        if (identifyUltralightFamily(nfcA)) {
+            sb.append("The Tag seems to be a MIFARE Ultralight Family tag").append("\n");
+            isTagUltralight = true;
+        } else {
+            sb.append("The Tag IS NOT a MIFARE Ultralight tag").append("\n");
+            sb.append("** End of Processing **").append("\n");
+            isTagUltralight = false;
+        }
+        writeToUiAppend(sb.toString());
+
+        // stop processing if not an Ultralight Family tag
+        if (!isTagUltralight) {
+            returnOnNotSuccess();
+            return;
+        }
+
         try {
             nfcA.connect();
 
             if (nfcA.isConnected()) {
-                // get card details
-                byte[] tagId = nfcA.getTag().getId();
-                String[] techList = nfcA.getTag().getTechList();
-                StringBuilder sb = new StringBuilder();
-                sb.append("Technical Data of the Tag").append("\n");
-                sb.append("Tag ID: ").append(bytesToHexNpe(tagId)).append("\n");
-                sb.append("Tech-List:").append("\n");
-                sb.append("Tag TechList: ").append(Arrays.toString(techList)).append("\n");
-                if (identifyUltralightFamily(nfcA)) {
-                    sb.append("The Tag seems to be a MIFARE Ultralight Family tag").append("\n");
+                // get the version
+                storageSize = identifyUltralightEv1Tag(nfcA);
+                sb = new StringBuilder();
+                if (storageSize == 0) {
+                    sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
+                    sb.append("** End of Processing **").append("\n");
+                    isTagUltralight = false;
+                } else if (storageSize == 48) {
+                    sb.append("The Tag is a MIFARE Ultralight EV1 tag with 48 bytes user memory size").append("\n");
+                    pagesToRead = 20;
+                    isTagUltralight = true;
+                } else if (storageSize == 128) {
+                    sb.append("The Tag is a MIFARE Ultralight EV1 tag with 128 bytes user memory size").append("\n");
+                    pagesToRead = 41;
                     isTagUltralight = true;
                 } else {
-                    sb.append("The Tag IS NOT a MIFARE Ultralight tag").append("\n");
+                    sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
                     sb.append("** End of Processing **").append("\n");
                     isTagUltralight = false;
                 }
                 writeToUiAppend(sb.toString());
-
-                // stop processing if not an Ultralight Family tag
                 if (!isTagUltralight) {
                     returnOnNotSuccess();
                     return;
                 }
-                writeToUiAppend("This is an Ultralight C tag with 48 pages = 192 bytes memory");
 
                 if (rbNoAuth.isChecked()) {
                     writeToUiAppend("No Authentication requested");
-                    authSuccess = false;
+                    authSuccess = true;
                 } else if (rbDefaultAuth.isChecked()) {
-                    writeToUiAppend("Authentication with Default Key requested");
-                    authSuccess = doAuthenticateUltralightCDefault(nfcA);
-                    writeToUiAppend("authenticateUltralightC with defaultAuthKey success: " + authSuccess);
+                    writeToUiAppend("Authentication with Default Password requested");
+                    // authenticate with default password and pack
+                    int authResult = authenticateUltralightEv1(nfcA, defaultPassword, defaultPack);
+                    if (authResult == 1) {
+                        writeToUiAppend("authentication with Default Password and Pack: SUCCESS");
+                        authSuccess = true;
+                    } else {
+                        writeToUiAppend("authentication with Default Password and Pack: FAILURE " + authResult);
+                        authSuccess = false;
+                    }
                 } else {
-                    writeToUiAppend("Authentication with Custom Key requested");
-                    authSuccess = authenticateUltralightC(nfcA, customAuthKey);
-                    writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
+                    writeToUiAppend("Authentication with Custom Password requested");
+                    // authenticate with custom password and pack
+                    int authResult = authenticateUltralightEv1(nfcA, customPassword, customPack);
+                    if (authResult == 1) {
+                        writeToUiAppend("authentication with Custom Password and Pack: SUCCESS");
+                        authSuccess = true;
+                    } else {
+                        writeToUiAppend("authentication with Custom Password and Pack: FAILURE " + authResult);
+                        authSuccess = false;
+                    }
                 }
-            }
 
-
-            // this is for Mifare Ultralight-C only
-            // the counter is located in page 41d bytes 0 + 1 (16 bit counter)
-            if (incrementNoCounter.isChecked()) {
-                Log.d(TAG, "No counter should get increased");
-                writeToUiAppend("No counter should get increased");
-            }
-            if (incrementCounter0.isChecked()) {
                 if (!authSuccess) {
-                    writeToUiAppend("Previous Auth was not successful or not done, skipped");
-                } else {
-                    success = increaseCounterByOne(nfcA, 0);
-                    writeToUiAppend("Status of increaseCounterValueByOne command to page 41: " + success);
+                    writeToUiAppend("The authentication was not successful, operation aborted.");
+                    returnOnNotSuccess();
+                    return;
                 }
-            }
-            int counter0I = readCounter(nfcA, 0);
-            writeToUiAppend("Counter in page 41d: " + counter0I);
-            writeCounterToUi(counter0I, 0, 0);
 
-        } catch (Exception e) {
+                if (incrementNoCounter.isChecked()) {
+                    Log.d(TAG, "No counter should get increased");
+                    writeToUiAppend("No counter should get increased");
+                }
+                if (incrementCounter0.isChecked()) {
+                    if (!authSuccess) {
+                        writeToUiAppend("Previous Auth was not successful or not done, skipped");
+                    } else {
+                        success = increaseCounterByOneEv1(nfcA, 0);
+                        writeToUiAppend("Status of increaseCounterValueByOne for counter 0: " + success);
+                    }
+                } else if (incrementCounter1.isChecked()) {
+                    if (!authSuccess) {
+                        writeToUiAppend("Previous Auth was not successful or not done, skipped");
+                    } else {
+                        success = increaseCounterByOneEv1(nfcA, 1);
+                        writeToUiAppend("Status of increaseCounterValueByOne for counter 1: " + success);
+                    }
+                } else if (incrementCounter2.isChecked()) {
+                    if (!authSuccess) {
+                        writeToUiAppend("Previous Auth was not successful or not done, skipped");
+                    } else {
+                        success = increaseCounterByOneEv1(nfcA, 2);
+                        writeToUiAppend("Status of increaseCounterValueByOne for counter 2: " + success);
+                    }
+                }
+                int counter0I = readCounterEv1(nfcA, 0);
+                int counter1I = readCounterEv1(nfcA, 1);
+                int counter2I = readCounterEv1(nfcA, 2);
+                writeToUiAppend("Counter 0: " + counter0I);
+                writeToUiAppend("Counter 1: " + counter1I);
+                writeToUiAppend("Counter 2: " + counter2I);
+                writeCounterToUi(counter0I, counter1I, counter2I);
+            }
+
+        } catch (
+                Exception e) {
             writeToUiAppend("Exception on connection: " + e.getMessage());
             e.printStackTrace();
         }
 
         writeToUiFinal(resultNfcWriting);
+
         playDoublePing();
+
         setLoadingLayoutVisibility(false);
+
         doVibrate(getActivity());
+
         reconnect(nfcA);
 
     }
@@ -261,7 +335,7 @@ public class WriteCounterFragment extends Fragment implements NfcAdapter.ReaderC
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                counter0.setText(String.valueOf(counter0I));
+                counter0.setText(String.valueOf(counter0I) + " / " + counter1I + " / " + counter2I);
             }
         });
     }

@@ -1,13 +1,17 @@
 package de.androidcrypto.mifare_ultralight_ev1_explorer;
 
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightC;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customAuthKey;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultAuthKey;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPassword;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPassword;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightEv1Tag;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writeAuth0UltralightC;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writeAuth1UltralightC;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writePageMifareUltralightC;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writePasswordUltralightC;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.pagesToRead;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writeAuth0UltralightEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writePageMifareUltralightEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writeProtUltralightEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.writePasswordPackUltralightEv1;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
 
@@ -82,6 +86,7 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
     private NfcAdapter mNfcAdapter;
     private NfcA nfcA;
     private boolean isTagUltralight = false;
+    private int storageSize = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -108,16 +113,14 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
         rbChangePasswordCustom = getView().findViewById(R.id.rbChangePasswordCustom);
         loadingLayout = getView().findViewById(R.id.loading_layout);
 
-        // The minimum number of pages to write is 12 (= 48 bytes user memory)
-        // as we are writing a 16 bytes long data we do need 4 pages to write the data and
-        // therefore when writing to page 9 we will write to pages 9, 10, 11 and 12
-        String[] type = new String[]{ "3", "4", "5", "6", "7", "10", "30", "39", "40", "48"};
+        // page number from where an authentication is necessary
+        String[] type = new String[]{ "4", "6", "8", "12", "16", "255"};
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
                 getView().getContext(),
                 R.layout.drop_down_item,
                 type);
         authenticationRequiredPage = getView().findViewById(R.id.authRequiredPage);
-        authenticationRequiredPage.setText(type[9]);
+        authenticationRequiredPage.setText(type[5]);
         authenticationRequiredPage.setAdapter(arrayAdapter);
     }
 
@@ -160,46 +163,93 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
             return;
         }
 
+        // get card details
+        byte[] tagId = nfcA.getTag().getId();
+        int maxTransceiveLength = nfcA.getMaxTransceiveLength();
+        String[] techList = nfcA.getTag().getTechList();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Technical Data of the Tag").append("\n");
+        sb.append("Tag ID: ").append(bytesToHexNpe(tagId)).append("\n");
+        sb.append("maxTransceiveLength: ").append(maxTransceiveLength).append(" bytes").append("\n");
+        sb.append("Tech-List:").append("\n");
+        sb.append("Tag TechList: ").append(Arrays.toString(techList)).append("\n");
+        if (identifyUltralightFamily(nfcA)) {
+            sb.append("The Tag seems to be a MIFARE Ultralight Family tag").append("\n");
+            isTagUltralight = true;
+        } else {
+            sb.append("The Tag IS NOT a MIFARE Ultralight tag").append("\n");
+            sb.append("** End of Processing **").append("\n");
+            isTagUltralight = false;
+        }
+        writeToUiAppend(sb.toString());
+
+        // stop processing if not an Ultralight Family tag
+        if (!isTagUltralight) {
+            returnOnNotSuccess();
+            return;
+        }
+
         try {
             nfcA.connect();
 
             if (nfcA.isConnected()) {
-                byte[] tagId = nfcA.getTag().getId();
-                String[] techList = nfcA.getTag().getTechList();
-                StringBuilder sb = new StringBuilder();
-                sb.append("Technical Data of the Tag").append("\n");
-                sb.append("Tag ID: ").append(bytesToHexNpe(tagId)).append("\n");
-                sb.append("Tech-List:").append("\n");
-                sb.append("Tag TechList: ").append(Arrays.toString(techList)).append("\n");
-                if (identifyUltralightFamily(nfcA)) {
-                    sb.append("The Tag seems to be a MIFARE Ultralight Family tag").append("\n");
+                // get the version
+                storageSize = identifyUltralightEv1Tag(nfcA);
+                sb = new StringBuilder();
+                if (storageSize == 0) {
+                    sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
+                    sb.append("** End of Processing **").append("\n");
+                    isTagUltralight = false;
+                } else if (storageSize == 48) {
+                    sb.append("The Tag is a MIFARE Ultralight EV1 tag with 48 bytes user memory size").append("\n");
+                    pagesToRead = 20;
+                    isTagUltralight = true;
+                } else if (storageSize == 128) {
+                    sb.append("The Tag is a MIFARE Ultralight EV1 tag with 128 bytes user memory size").append("\n");
+                    pagesToRead = 41;
                     isTagUltralight = true;
                 } else {
-                    sb.append("The Tag IS NOT a MIFARE Ultralight tag").append("\n");
+                    sb.append("The Tag IS NOT a MIFARE Ultralight EV1 tag").append("\n");
                     sb.append("** End of Processing **").append("\n");
                     isTagUltralight = false;
                 }
                 writeToUiAppend(sb.toString());
-
-                // stop processing if not an Ultralight Family tag
                 if (!isTagUltralight) {
                     returnOnNotSuccess();
                     return;
                 }
 
-                writeToUiAppend("This is an Ultralight C tag with 48 pages = 192 bytes memory");
-
                 if (rbNoAuth.isChecked()) {
                     writeToUiAppend("No Authentication requested");
                     authSuccess = true;
                 } else if (rbDefaultAuth.isChecked()) {
-                    writeToUiAppend("Authentication with Default Key requested");
-                    authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
-                    writeToUiAppend("authenticateUltralightC with defaultAuthKey success: " + authSuccess);
+                    writeToUiAppend("Authentication with Default Password requested");
+                    // authenticate with default password and pack
+                    int authResult = authenticateUltralightEv1(nfcA, defaultPassword, defaultPack);
+                    if (authResult == 1) {
+                        writeToUiAppend("authentication with Default Password and Pack: SUCCESS");
+                        authSuccess = true;
+                    } else {
+                        writeToUiAppend("authentication with Default Password and Pack: FAILURE " + authResult);
+                        authSuccess = false;
+                    }
                 } else {
-                    writeToUiAppend("Authentication with Custom Key requested");
-                    authSuccess = authenticateUltralightC(nfcA, customAuthKey);
-                    writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
+                    writeToUiAppend("Authentication with Custom Password requested");
+                    // authenticate with custom password and pack
+                    int authResult = authenticateUltralightEv1(nfcA, customPassword, customPack);
+                    if (authResult == 1) {
+                        writeToUiAppend("authentication with Custom Password and Pack: SUCCESS");
+                        authSuccess = true;
+                    } else {
+                        writeToUiAppend("authentication with Custom Password and Pack: FAILURE " + authResult);
+                        authSuccess = false;
+                    }
+                }
+
+                if (!authSuccess) {
+                    writeToUiAppend("The authentication was not successful, operation aborted.");
+                    returnOnNotSuccess();
+                    return;
                 }
 
                 // get page for memory protection start
@@ -207,17 +257,17 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                 byte defineAuth0Page = (byte) Integer.parseInt(choiceString);
 
                 // write Auth0
-                success = writeAuth0UltralightC(nfcA, defineAuth0Page);
+                success = writeAuth0UltralightEv1(nfcA, defineAuth0Page);
                 writeToUiAppend("Status of writeAuth0 command to page 32: " + success);
 
-                // write Auth1
+                // write Prot
                 boolean defineWriteOnlyRestricted;
                 if (rbMemoryWriteProtection.isChecked()) {
                     defineWriteOnlyRestricted = true;
                 } else {
                     defineWriteOnlyRestricted = false;
                 }
-                success = writeAuth1UltralightC(nfcA, defineWriteOnlyRestricted);
+                success = writeProtUltralightEv1(nfcA, defineWriteOnlyRestricted);
                 writeToUiAppend("Status of writeAuth1 command to WriteRestrictedOnly: " + success);
 
                 // clearing of the free user memory
@@ -229,7 +279,7 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                     byte[] emptyPage = new byte[4];
                     success = true; // to run the first write command
                     for (int i = 4; i < 40; i++) {
-                        if (success) success = writePageMifareUltralightC(nfcA, i, emptyPage);
+                        if (success) success = writePageMifareUltralightEv1(nfcA, i, emptyPage);
                         writeToUiAppend("Writing to page " + i + ": " + success);
                     }
                     if (success) writeToUiAppend("Memory Clearing done");
@@ -240,13 +290,23 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                     // no password change
                     writeToUiAppend("No password change requested");
                 } else if (rbChangePasswordDefault.isChecked()) {
-                    // change password to default
-                    success = writePasswordUltralightC(nfcA, defaultAuthKey);
-                    writeToUiAppend("Change the password to DEFAULT password: " + success);
+                    // change password & pack to default
+                    writeToUiAppend("== Password & Pack change ==");
+                    int passwordPackChangeSuccess = writePasswordPackUltralightEv1(nfcA, defaultPassword, defaultPack);
+                    if (passwordPackChangeSuccess == 1) {
+                        writeToUiAppend("writePasswordPackUltralightEv1 with Default Password and Pack: SUCCESS");
+                    } else {
+                        writeToUiAppend("writePasswordPackUltralightEv1 with Default Password and Pack: FAILURE " + passwordPackChangeSuccess);
+                    }
                 } else {
-                    // change password to custom
-                    success = writePasswordUltralightC(nfcA, customAuthKey);
-                    writeToUiAppend("Change the password to CUSTOM password: " + success);
+                    // change password & pack to custom
+                    writeToUiAppend("== Password & Pack change ==");
+                    int passwordPackChangeSuccess = writePasswordPackUltralightEv1(nfcA, customPassword, customPack);
+                    if (passwordPackChangeSuccess == 1) {
+                        writeToUiAppend("writePasswordPackUltralightEv1 with Custom Password and Pack: SUCCESS");
+                    } else {
+                        writeToUiAppend("writePasswordPackUltralightEv1 with Custom Password and Pack: FAILURE " + passwordPackChangeSuccess);
+                    }
                 }
             }
         } catch (Exception e) {

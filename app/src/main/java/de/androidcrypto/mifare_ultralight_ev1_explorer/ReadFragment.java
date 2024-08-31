@@ -1,16 +1,16 @@
 package de.androidcrypto.mifare_ultralight_ev1_explorer;
 
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightC;
-
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customAuthKey;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultAuthKey;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.authenticateUltralightEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.customPassword;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPack;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.defaultPassword;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightEv1Tag;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.identifyUltralightFamily;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.increaseCounterByOne;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.pagesToRead;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCompleteContent;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCompleteContentFastRead;
-import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCounter;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCompleteContentFastReadEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readCounterEv1;
+import static de.androidcrypto.mifare_ultralight_ev1_explorer.MIFARE_Ultralight_EV1.readVirtualCardSelectLastEv1;import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.byteToHex;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.bytesToHexNpe;
 import static de.androidcrypto.mifare_ultralight_ev1_explorer.Utils.doVibrate;
 
@@ -211,18 +211,27 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 writeToUiAppend("No Authentication requested");
                 authSuccess = true;
             } else if (rbDefaultAuth.isChecked()) {
-                writeToUiAppend("Authentication with Default Key requested");
-                //authSuccess = doAuthenticateUltralightCDefault();
-                //byte[] defaultKey = "BREAKMEIFYOUCAN!".getBytes(StandardCharsets.UTF_8);
-                //authSuccess = authenticateUltralightC(nfcA, defaultKey);
-                authSuccess = authenticateUltralightC(nfcA, defaultAuthKey);
-                writeToUiAppend("authenticateUltralightC with defaultAuthKey success: " + authSuccess);
+                writeToUiAppend("Authentication with Default Password requested");
+                // authenticate with default password and pack
+                int authResult = authenticateUltralightEv1(nfcA, defaultPassword, defaultPack);
+                if (authResult == 1) {
+                    writeToUiAppend("authentication with Default Password and Pack: SUCCESS");
+                    authSuccess = true;
+                } else {
+                    writeToUiAppend("authentication with Default Password and Pack: FAILURE " + authResult);
+                    authSuccess = false;
+                }
             } else {
-                writeToUiAppend("Authentication with Custom Key requested");
-                authSuccess = authenticateUltralightC(nfcA, customAuthKey);
-                //authSuccess = doAuthenticateUltralightCCustom();
-                //authSuccess = authenticateUltralightC(nfcA, customAuthKey);
-                writeToUiAppend("authenticateUltralightC with customAuthKey success: " + authSuccess);
+                writeToUiAppend("Authentication with Custom Password requested");
+                // authenticate with custom password and pack
+                int authResult = authenticateUltralightEv1(nfcA, customPassword, customPack);
+                if (authResult == 1) {
+                    writeToUiAppend("authentication with Custom Password and Pack: SUCCESS");
+                    authSuccess = true;
+                } else {
+                    writeToUiAppend("authentication with Custom Password and Pack: FAILURE " + authResult);
+                    authSuccess = false;
+                }
             }
 
             if (!authSuccess) {
@@ -231,8 +240,9 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
                 return;
             }
 
+
             // read complete memory with colored data
-            byte[] memoryContent = readCompleteContentFastRead(nfcA);
+            byte[] memoryContent = readCompleteContentFastReadEv1(nfcA);
             String memoryDumpString = HexDumpOwn.prettyPrint(memoryContent);
 
             SpannableString spanString = new SpannableString(memoryDumpString);
@@ -303,9 +313,9 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             });
 
             // Read all 3 counters
-            writeToUiAppend("Counter 0: " + readCounter(nfcA, 0));
-            writeToUiAppend("Counter 1: " + readCounter(nfcA, 1));
-            writeToUiAppend("Counter 2: " + readCounter(nfcA, 2));
+            writeToUiAppend("Counter 0: " + readCounterEv1(nfcA, 0));
+            writeToUiAppend("Counter 1: " + readCounterEv1(nfcA, 1));
+            writeToUiAppend("Counter 2: " + readCounterEv1(nfcA, 2));
 /*
             // increase counter 0
             writeToUiAppend("Increase Counter 0 by one: " + increaseCounterByOne(nfcA, 0));
@@ -313,6 +323,14 @@ public class ReadFragment extends Fragment implements NfcAdapter.ReaderCallback 
             // read counter 0 again
             writeToUiAppend("Counter 0: " + readCounter(nfcA, 0));
 */
+            // Virtual Card Select Last (VCSL) command
+            byte vctid = readVirtualCardSelectLastEv1(nfcA);
+            writeToUiAppend("Virtual Card Type Identifier: " + byteToHex(vctid));
+
+
+
+
+
             nfcA.close();
         } catch (IOException e) {
             writeToUiAppend("IOException on connection: " + e.getMessage());
