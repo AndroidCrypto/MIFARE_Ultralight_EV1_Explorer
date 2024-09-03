@@ -366,18 +366,20 @@ public class MIFARE_Ultralight_EV1 {
     }
 
     /**
-     * AUTH1 defines if the authentication restriction is for write only or read and write access
+     * The ACCESS byte defines if the authentication restriction is for write only or read and write access
      * Note: as we are writing the configuration 1 page there are more settings involved.
      * Usually we should read this page and change just the necessary bits, but this methods does
      * write the following data:
      * a) Byte 0 = 'Access' with these settings:
-     *             Bit 7 = Prot is 0 when writeAccessRestrictedOnly = true and 1 when false
-     *             Bit 6 = CFGLCK: fixed to '0' Write locking bit for the user configuration, 0b = user configuration open to write access
-     *             Bits 5/4/3 = RFUI, fixed to '0'
-     *             Bits 2/1/0 = AUTHLIM, fixed to '000' = disabled Limitation of negative password verification attempts
-     * b) Byte 1 = 'VCTID', fixed to 05h, Virtual Card Type Identifier which represents the response to a VCSL command. To ensure infrastructure compatibility, it is recommended not to change the default value of 05h.
+     *             Bit 7      = Prot is 0b when writeAccessRestrictedOnly = true and 1b when false (auth required for read and write access)
+     *             Bit 6      = CFGLCK: fixed to '0b' Write locking bit for the user configuration, 0b = user configuration open to write access
+     *             Bits 5/4/3 = RFUI, fixed to '0b'
+     *             Bits 2/1/0 = AUTHLIM, fixed to '000b' = disabled Limitation of negative password verification attempts
+     * b) Byte 1 = 'VCTID', fixed to 05h, Virtual Card Type Identifier which represents the response to a VCSL command.
+     *             To ensure infrastructure compatibility, it is recommended not to change the default value of 05h.
      * c) Byte 2 = RFUI, fixed to 00h
      * d) Byte 3 = RFUI, fixed to 00h
+     *
      * In short, this data is written to the page in case of writeAccessRestrictedOnly:
      *   - true:  0x 00 05 00 00 (just the write access is allowed after authentication)
      *   - false: 0x F0 05 00 00 (read and write acccess is allowed after authentication)

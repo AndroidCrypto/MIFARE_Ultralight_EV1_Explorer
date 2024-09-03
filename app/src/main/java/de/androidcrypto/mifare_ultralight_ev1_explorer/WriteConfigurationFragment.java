@@ -75,6 +75,7 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
         fragment.setArguments(args);
         return fragment;
     }
+
     private TextView readResult;
     private RadioButton rbNoAuth, rbDefaultAuth, rbCustomAuth;
     private RadioButton rbMemoryWriteProtection, rbMemoryWriteReadProtection;
@@ -114,7 +115,7 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
         loadingLayout = getView().findViewById(R.id.loading_layout);
 
         // page number from where an authentication is necessary
-        String[] type = new String[]{ "4", "6", "8", "12", "16", "255"};
+        String[] type = new String[]{"4", "6", "8", "12", "16", "255"};
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
                 getView().getContext(),
                 R.layout.drop_down_item,
@@ -278,9 +279,19 @@ public class WriteConfigurationFragment extends Fragment implements NfcAdapter.R
                     // try to write to all pages in the range 04h .. 27h  (04d .. 39d)
                     byte[] emptyPage = new byte[4];
                     success = true; // to run the first write command
-                    for (int i = 4; i < 40; i++) {
-                        if (success) success = writePageMifareUltralightEv1(nfcA, i, emptyPage);
-                        writeToUiAppend("Writing to page " + i + ": " + success);
+                    if (pagesToRead == 20) {
+                        for (int i = 4; i <= 15; i++) {
+                            if (success) success = writePageMifareUltralightEv1(nfcA, i, emptyPage);
+                            writeToUiAppend("Writing to page " + i + ": " + success);
+                        }
+                    } else if (pagesToRead == 41) {
+                        for (int i = 4; i <= 35; i++) {
+                            if (success) success = writePageMifareUltralightEv1(nfcA, i, emptyPage);
+                            writeToUiAppend("Writing to page " + i + ": " + success);
+                        }
+                    } else {
+                        writeToUiAppend("Unknown tag size, writing aborted");
+                        success = false;
                     }
                     if (success) writeToUiAppend("Memory Clearing done");
                 }

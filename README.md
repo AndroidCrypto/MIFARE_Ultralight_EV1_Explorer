@@ -31,25 +31,39 @@ There are 5 icons in the "Bottom Navigation Bar":
 
 ### Home Fragment:
 
-
+![Screen of the Home Fragment](screenshots/small/app_home_01.png)
 
 ### Read Fragment
 
 ![Screen of the Read Fragment](screenshots/small/app_read_01.png)
 
+![Screen of the Read Fragment](screenshots/small/app_read_02.png)
 
+![Screen of the Read Fragment](screenshots/small/app_read_03.png)
+
+![Screen of the Read Fragment](screenshots/small/app_read_04.png)
 
 ### Write Counter Fragment
 
+![Screen of the Write Counter Fragment](screenshots/small/app_write_counter_01.png)
 
+![Screen of the Write Counter Fragment](screenshots/small/app_write_counter_02.png)
 
 ### Write Data Fragment
 
+![Screen of the Write Data Fragment](screenshots/small/app_write_01.png)
 
+![Screen of the Write Data Fragment](screenshots/small/app_write_02.png)
 
 ### Write Configuration Fragment
 
+![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_01.png)
 
+![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_02.png)
+
+![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_03.png)
+
+![Screen of the Write Configuration Fragment](screenshots/small/app_write_configuration_04.png)
 
 ## What is not possible with this app ?
 
@@ -73,32 +87,35 @@ Minimum SDK is 21 (Android 5)
 
 ### Authentication of a MIFARE Ultralight EV1:
 
-The Ultralight EV1 tag uses a Triple DES authentication scheme with a 2 DES keys model, so in the end it uses a 16 bytes long TDES key. 
+The Ultralight EV1 tag uses a 4 bytes long password for authentication and a 2 bytes long PACK (Password Acknowledge). 
 
-I'm using 2 predefined keys in the app:
+I'm using 2 predefined keys (password) and PACK in the app:
 
 ```plaintext
-byte[] defaultAuthKey = hexStringToByteArray("49454D4B41455242214E4143554F5946"); // "IEMKAERB!NACUOYF" => "BREAKMEIFYOUCAN!", 16 bytes long
-byte[] customAuthKey = "1234567890123456".getBytes(StandardCharsets.UTF_8);
+byte[] defaultPassword = hexStringToByteArray("FFFFFFFF");
+byte[] defaultPack = hexStringToByteArray("0000");
+byte[] customPassword = hexStringToByteArray("12345678");
+byte[] customPack = hexStringToByteArray("9876");
 ```
 
 ### Counter on Mifare Ultralight-C:
 ```plaintext
-7.5.11 Counter
-The MF0ICU2 features a 16-bit one-way counter, located at the first two bytes of page 
-29h. The default counter value is 0000h.
+8.7 Counter functionality
+The MF0ULx1 features three independent 24-bit one-way counters. These counters are located in a separate 
+part of the NVM which is not directly addressable using READ, FAST_READ, WRITE or COMPATIBILITY_WRITE 
+commands. The actual value can be retrieved by using the READ_CNT command, the counters can be incremented
+with the INCR_CNT command. The INCR_CNT command features anti-tearing support, thus no undefined values 
+originating from interrupted programing cycles are possible. Either the value is unchanged or the correct, 
+incremented value is correctly programmed into the counter. The occurrence of a tearing event can be checked 
+using the CHECK_TEARING_EVENT command.
 
-The first1 valid WRITE or COMPATIBILITY WRITE to address 29h can be performed
-with any value in the range between 0001h and FFFFh and corresponds to the initial
-counter value. Every consecutive WRITE command, which represents the increment, can
-contain values between 0001h and 000Fh. Upon such WRITE command and following
-mandatory RF reset, the value written to the address 29h is added to the counter content.
-After the initial write, only the lower nibble of the first data byte is used for the increment
-value (0h-Fh) and the remaining part of the data is ignored. Once the counter value
-reaches FFFFh and an increment is performed via a valid WRITE command, the
-MF0ICU2 will reply a NAK. If the sum of counter value and increment is higher than
-FFFFh, MF0ICU2 will reply a NAK and will not increment the counter.
-An increment by zero (0000h) is always possible, but does not have any impact to the
-counter value.
-It is recommended to protect the access to the counter functionality by authentication.
+In the initial state, the counter values are set to 000000h.
+
+The counters can be incremented by an arbitrary value. The incremented value is
+valid immediately and does not require a RF reset or re-activation. Once counter value reaches FFFFFFh and an 
+increment is performed via a valid INCR_CNT command, the MF0ULx1 replies a NAK. If the sum of the addressed 
+counter value and the increment value in the INCR_CNT command is higher than FFFFFFh, the MF0ULx1 replies a 
+NAK and does not update the respective counter.
+
+An increment by zero (000000h) is always possible, but does not have any impact on the counter value.
 ```

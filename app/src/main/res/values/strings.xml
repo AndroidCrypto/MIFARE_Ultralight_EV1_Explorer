@@ -3,17 +3,17 @@
     <string name="home_description">This application reads and writes data from/to a MIFARE Ultralight EV1 NFC tag.</string>
     <string name="home_fragments">There are 5 icons to click on:\n1 home = this page\n2 read data with or without authentication\n3 write counter = increment the counter\n4 write data\n5  write configuration = changes the configuration of the tag (e.g. authentication key, write and/or read authentication, memory clearing, change password)</string>
     <string name="header_read">This app works with a MIFARE Ultralight EV1 tag for reading</string>
-    <string name="description_read">This example expects a MIFARE Ultralight type tag.\n\nWhen a tag is discovered the data from all records will be read.</string>
+    <string name="description_read">This example expects a MIFARE Ultralight EV1 type tag.\n\nWhen a tag is discovered the data from all pages will be read.</string>
     <string name="header_read_counter">Read the counter</string>
     <string name="description_read_counter">This example reads an Ultralight EV1 tag type and shows the value of the counter(s).\n\nWhen a tag is discovered the data from all records will be read.</string>
     <string name="nfc_result">NFC read result</string>
     <string name="header_write">This app works with a MIFARE Ultralight EV1 tag for writing</string>
-    <string name="description_write">This example writes data to a page on a MIFARE Ultralight C tag</string>
+    <string name="description_write">This example writes data to a page on a MIFARE Ultralight EV1 tag</string>
     <string name="action_licenses">Used material and their licenses</string>
     <string name="header_write_counter">Increment the value of the counter</string>
     <string name="description_write_counter">This example increases the counter on an Ultralight EV1 tag type and shows the value of the counter.\n\nWhen a tag is discovered the counter will be increased without any further confirmation (if selected).</string>
     <string name="write_counter_warning">The increasing of a counter is not reversible and not resettable, so please act with caution</string>
-    <string name="description_write_page">Memory Protection: Select the page from where an authentication is required for writing or reading. Using \'48\' disables memory protection.</string>
+    <string name="description_write_page">Memory Protection: Select the page from where an authentication is required for writing or reading. Using \'255\' disables memory protection.</string>
     <string name="description_memory_protection"><![CDATA[Select if the  memory protection is for write access only or write & read access]]></string>
     <string name="description_write_configuration">This example expects a MIFARE Ultralight EV1 type tag. It writes a new memory protection configuration to the tag.\n\nWhen a tag is discovered the new data will be written without any confirmation.</string>
     <string name="description_change_password">Change the password of the tag, select the new Default or a Custom password</string>
