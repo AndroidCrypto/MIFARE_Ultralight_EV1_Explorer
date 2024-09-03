@@ -7,7 +7,7 @@ This app reads and writes data to NXP's MIFARE Ultralight EV1 tag. It is tested 
 **Please do not use a MIFARE Ultralight or Ultralight C tag with this app** - these have a similar command set but are different 
 in Authentication, page locking, counter and other details. Using these tags with the app may brick your tag.
 
-The tutorial to this app is available on medium.com: ... please be patient
+The tutorial to this app is available on medium.com: https://medium.com/@androidcrypto/explore-a-mifare-ultralight-ev1-nfc-tag-android-java-a23d0b4b0ea5
 
 ## Data Sheet
 
