@@ -119,3 +119,7 @@ NAK and does not update the respective counter.
 
 An increment by zero (000000h) is always possible, but does not have any impact on the counter value.
 ```
+
+## License
+
+MIFARE Ultralight EV1 Explorer is available under the MIT license. See the LICENSE.md file for more info.
